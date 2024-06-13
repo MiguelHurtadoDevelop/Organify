@@ -118,7 +118,18 @@ class TareaController extends Controller
         $archivos = Archivo::where('tarea_id', $tarea->id)
                     ->get();
                     
+        if($tarea->imagen){
+            $portadaPath = public_path('archivos') . '/' . $tarea->imagen;
+            if (file_exists($portadaPath)) {
+                unlink($portadaPath);
+            }
+        }
+
         foreach ($archivos as $archivo) {
+            $archivoPath = public_path('archivos') . '/' . $archivo->nombre;
+            if (file_exists($archivoPath)) {
+                unlink($archivoPath);
+            }
             $archivo->delete();
         }   
         
@@ -151,6 +162,14 @@ class TareaController extends Controller
             $portada = $request->file('portada');
             $portadaName = time() . '.' . $portada->extension();
             $portada->move(public_path('archivos'), $portadaName);
+
+            // Delete the previous portada file
+            if ($tarea->imagen) {
+                $previousPortada = public_path('archivos') . '/' . $tarea->imagen;
+                if (file_exists($previousPortada)) {
+                    unlink($previousPortada);
+                }
+            }
         }
 
         $archivoNames = [];
@@ -165,6 +184,10 @@ class TareaController extends Controller
         if($request->has('archivosParaEliminar')){
             foreach ($request->archivosParaEliminar as $archivo) {
                 Archivo::find($archivo)->delete();
+                $archivoPath = public_path('archivos') . '/' . $archivo;
+                if (file_exists($archivoPath)) {
+                    unlink($archivoPath);
+                }
             }
         }
 
@@ -286,6 +309,14 @@ class TareaController extends Controller
             $portada = $request->file('portada');
             $portadaName = time() . '.' . $portada->extension();
             $portada->move(public_path('archivos'), $portadaName);
+
+            // Delete the previous portada file
+            if ($tarea->imagen) {
+                $previousPortada = public_path('archivos') . '/' . $tarea->imagen;
+                if (file_exists($previousPortada)) {
+                    unlink($previousPortada);
+                }
+            }
         }
 
         $archivoNames = json_decode($tarea->archivos, true) ?? [];
@@ -300,6 +331,10 @@ class TareaController extends Controller
         if($request->has('archivosParaEliminar')){
             foreach ($request->archivosParaEliminar as $archivo) {
                 Archivo::find($archivo)->delete();
+                $archivoPath = public_path('archivos') . '/' . $archivo;
+                if (file_exists($archivoPath)) {
+                    unlink($archivoPath);
+                }
             }
         }
 
@@ -429,6 +464,24 @@ class TareaController extends Controller
     public function rechazarTarea($tarea_id)
     {
         $tarea = Tarea::find($tarea_id);
+
+        if($tarea->imagen){
+            $portadaPath = public_path('archivos') . '/' . $tarea->imagen;
+            if (file_exists($portadaPath)) {
+                unlink($portadaPath);
+            }
+        }
+
+        $archivos = Archivo::where('tarea_id', $tarea->id)
+                    ->get();
+        foreach ($archivos as $archivo) {
+            $archivoPath = public_path('archivos') . '/' . $archivo->nombre;
+            if (file_exists($archivoPath)) {
+                unlink($archivoPath);
+            }
+            $archivo->delete();
+        }   
+
         $tarea->delete();
 
         $this->tareasTablonEquipo($tarea->equipo_id);

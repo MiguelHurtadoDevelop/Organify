@@ -19,6 +19,7 @@ const showFormTarea = ref(false);
 const showingNavigationDropdown = ref(false);
 const showFormEquipo = ref(false);
 const showNotifications = ref(false);
+const notificaciones = ref(props.NotificacionesUsuario);
 
 const toggleForm = () => {
   showFormEquipo.value = !showFormEquipo.value;
@@ -39,7 +40,8 @@ const handleFormSubmittedTarea = () => {
 const closeDivOnClickOutside = (event) => {
   if (event.target.classList.contains('div-overlay')) {
     showFormEquipo.value = false;
-    showFormTarea.value = false
+    showFormTarea.value = false;
+    showNotifications.value = false;
   }
 }
 
@@ -51,34 +53,42 @@ const closeMobileMenu = () => {
   showingNavigationDropdown.value = false;
 }
 
-const aceptarUsuario = (usuarioId, equipoId) => {
+const aceptarUsuario = (usuarioId, equipoId, notificacionId) => {
+  eliminarNotificacion(notificacionId);
   router.get(route('equipo.aceptarSolicitud', { equipo_id: equipoId, user: usuarioId }), {
     onSuccess: () => {
       console.log('Aceptando usuario', usuarioId, 'en equipo', equipoId);
+      
     }
   });
 }
 
-const rechazarUsuario = (usuarioId, equipoId) => {
+const rechazarUsuario = (usuarioId, equipoId , notificacionId) => {
+  eliminarNotificacion(notificacionId);
   router.get(route('equipo.rechazarSolicitud', { equipo_id: equipoId, user: usuarioId }), {
     onSuccess: () => {
       console.log('Rechazando usuario', usuarioId, 'en equipo', equipoId);
+      
     }
   });
 }
 
-const aceptarTarea = (tareaId) => {
+const aceptarTarea = (tareaId , notificacionId) => {
+  eliminarNotificacion(notificacionId);
   router.get(route('tarea.aceptar', tareaId), {
     onSuccess: () => {
       console.log('Aceptando tarea', tareaId);
+      
     }
   });
 }
 
-const rechazarTarea = (tareaId) => {
+const rechazarTarea = (tareaId, notificacionId ) => {
+  eliminarNotificacion(notificacionId);
   router.get(route('tarea.rechazar', tareaId), {
     onSuccess: () => {
       console.log('Rechazando tarea', tareaId);
+      
     }
   });
 }
@@ -93,7 +103,7 @@ const decodeData = (data) => {
 }
 
 const eliminarNotificacion = (notificacionId) => {
-  props.NotificacionesUsuario = props.NotificacionesUsuario.filter(notificacion => notificacion.id !== notificacionId);
+  notificaciones.value = notificaciones.value.filter(notificacion => notificacion.id !== notificacionId);
   router.post(route('notificacion.eliminar'), {
     id: notificacionId,
     onSuccess: () => {
@@ -104,11 +114,13 @@ const eliminarNotificacion = (notificacionId) => {
 </script>
 
 <template>
+  
+
   <div class="flex h-screen">
     <!-- Fixed Sidebar -->
     <nav class="w-72 flex flex-col h-full fixed hidden md:flex border-r-2 border-solid border-gray-800 z-30 bg-gray-800 text-white justify-between">
       <div class="absolute left-4 top-4">
-        <button v-if="props.NotificacionesUsuario.length > 0" @click="showNotifications = true" class="justify-center p-2 rounded-md">
+        <button v-if="notificaciones.length > 0" @click="showNotifications = true" class="justify-center p-2 rounded-md">
           <font-awesome-icon :icon="['fas', 'bell']" class="text-red-600 text-2xl" />
         </button>
         <button v-else @click="showNotifications = true" class="justify-center p-2 rounded-md">
@@ -207,7 +219,7 @@ const eliminarNotificacion = (notificacionId) => {
         </div>
 
         <div class="absolute left-4 top-4">
-          <button v-if="props.NotificacionesUsuario.length > 0" @click="showNotifications = true" class="justify-center p-2 rounded-md">
+          <button v-if="notificaciones.length > 0" @click="showNotifications = true" class="justify-center p-2 rounded-md">
             <font-awesome-icon :icon="['fas', 'bell']" class="text-red-600 text-2xl" />
           </button>
           <button v-else @click="showNotifications = true" class="justify-center p-2 rounded-md">
@@ -242,7 +254,7 @@ const eliminarNotificacion = (notificacionId) => {
                   <div class="flex justify-center pb-2">
                     <p class="border-b-2">Mis Equipos</p>
                   </div>
-                  <div class="max-h-[12rem] overflow-auto">
+                  <div class="max-h-[9rem] overflow-auto">
                     <div  class=" font-semibold" v-for="equipo in props.EquiposUsuario" :key="equipo.id">
                       <ResponsiveNavLink :href="`/equipo/${equipo.id}/tablon`" :active="route().current('equipo.tablon') && Number(route().params.equipo) === Number(equipo.id)" class="nav-link mb-2 rounded-md">
                         <div class="flex items-center gap-2">
@@ -303,9 +315,13 @@ const eliminarNotificacion = (notificacionId) => {
 
   <!-- Modal for notifications -->
   <div v-if="showNotifications" class="fixed inset-0 z-50 flex items-center justify-center div-overlay" @click="closeDivOnClickOutside">
-    <div class="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full">
-      <div v-if="props.NotificacionesUsuario.length > 0">
-        <div v-for="notificacion in props.NotificacionesUsuario" :key="notificacion.id" class="mt-1 mb-4 p-4 bg-gray-100 rounded-lg shadow-sm relative">
+    <div class="w-[22rem] md:w-[70rem] max-w-lg p-4 max-h-[35rem] md:max-h-[45rem] bg-gray-800 relative rounded-lg shadow-md overflow-auto">
+      <button @click="showNotifications = false" class="text-gray-400 absolute right-2 top-2 text-xl font-bold focus:outline-none">
+            <font-awesome-icon :icon="['fas', 'xmark']" />
+      </button>
+      <h2 class="text-center text-2xl mt-4 mb-4 text-green-400">Notificaciones</h2>
+      <div class="" v-if="notificaciones.length > 0">
+        <div v-for="notificacion in notificaciones" :key="notificacion.id" class="mt-1 mb-4 p-4 bg-gray-100 rounded-lg shadow-sm relative">
           <button @click="eliminarNotificacion(notificacion.id)" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -318,8 +334,8 @@ const eliminarNotificacion = (notificacionId) => {
               <p class="mb-2"><strong>Usuario:</strong> {{ decodeData(notificacion.data).user.nombre }}</p>
               <p class="mb-4"><strong>Equipo ID:</strong> {{ decodeData(notificacion.data).equipo_id }}</p>
               <div class="flex justify-end gap-2">
-                <button @click="aceptarUsuario(decodeData(notificacion.data).user.id, decodeData(notificacion.data).equipo_id)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Aceptar</button>
-                <button @click="rechazarUsuario(decodeData(notificacion.data).user.id, decodeData(notificacion.data).equipo_id)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Rechazar</button>
+                <button @click="aceptarUsuario(decodeData(notificacion.data).user.id, decodeData(notificacion.data).equipo_id, notificacion.id)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Aceptar</button>
+                <button @click="rechazarUsuario(decodeData(notificacion.data).user.id, decodeData(notificacion.data).equipo_id , notificacion.id)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Rechazar</button>
               </div>
             </div>
           </div>
@@ -328,8 +344,8 @@ const eliminarNotificacion = (notificacionId) => {
             <p class="mb-2">{{ notificacion.descripcion }}</p>
             <div v-if="decodeData(notificacion.data)">
               <div class="flex justify-end gap-2">
-                <button @click="aceptarTarea(decodeData(notificacion.data).tarea)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Aceptar</button>
-                <button @click="rechazarTarea(decodeData(notificacion.data).tarea)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Rechazar</button>
+                <button @click="aceptarTarea(decodeData(notificacion.data).tarea , notificacion.id)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Aceptar</button>
+                <button @click="rechazarTarea(decodeData(notificacion.data).tarea , notificacion.id)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Rechazar</button>
               </div>
             </div>
           </div>
@@ -339,12 +355,10 @@ const eliminarNotificacion = (notificacionId) => {
           </div>
         </div>
       </div>
-      <div v-else class="text-center">
+      <div v-else class="text-center text-white">
         <p>No hay notificaciones</p>
       </div>
-      <div class="flex justify-end mt-4">
-        <button @click="showNotifications = false" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Cerrar</button>
-      </div>
+      
     </div>
   </div>
 </template>

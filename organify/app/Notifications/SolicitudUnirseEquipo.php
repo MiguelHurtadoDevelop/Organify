@@ -42,7 +42,7 @@ class SolicitudUnirseEquipo extends Notification
     return (new MailMessage)
                 ->line('The introduction to the notification.')
                 ->action('Aceptar Solicitud', route('equipo.aceptarSolicitud', ['user' => $this->user, 'equipo_id' => $this->equipo_id]))
-                ->line('Thank you for using our application!');
+                ->line('¡Gracias por usar nuestra aplicación!');
 }
 
     /**

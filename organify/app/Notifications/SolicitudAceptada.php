@@ -41,9 +41,10 @@ class SolicitudAceptada extends Notification
     {
         $equipo = Equipo::find($this->equipo_id);
         return (new MailMessage)
+                    ->subject('Solicitud aceptada')
                     ->line('Has sido aceptado en el equipo ' . $equipo->nombre)
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->action('Tablón del equipo', route('equipo.tablon', ['equipo' => $this->equipo_id]))
+                    ->line('¡Gracias por usar nuestra aplicación!');
     }
 
     /**

@@ -123,7 +123,7 @@ const updateSelectedStatus = (event) => {
       </div>
       
 
-        <div class=" columns-sm ">
+        <div class="columns-sm ">
           <div class="mb-5" v-if="sortedAndFilteredTareas.length > 0" v-for="tarea in sortedAndFilteredTareas" :key="tarea.id">
             <TareaLayout :tarea="tarea" />
           </div>

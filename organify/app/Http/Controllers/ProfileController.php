@@ -63,6 +63,10 @@ class ProfileController extends Controller
             $foto = $request->file('foto');
             $fotoName = time() . '.' . $foto->extension();
             $foto->move(public_path('archivos'), $fotoName);  
+
+            if($user->foto != 'default.jpg') {
+                unlink(public_path('archivos/' . $user->foto)); // Elimina la foto anterior si no es la foto por defecto
+            }
         } else {
             $fotoName = $user->foto; // Conserva la foto existente si no se proporciona una nueva
         }

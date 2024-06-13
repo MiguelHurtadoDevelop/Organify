@@ -134,9 +134,10 @@ const elimiarArchivo = (archivoId) => {
             <div class="mt-4">
                 <InputLabel value="Archivos existentes" class="text-white"/>
                 <div class="mt-1 block w-full">
-                    <div v-for="archivo in form.archivosExistentes" :key="archivo.id" class="text-green-500">
-                        <a :href="`/archivos/${archivo.nombre}`" target="_blank">{{ archivo.nombre }}</a>
-                        <button type="button" @click="elimiarArchivo(archivo.id)" class="text-red-500">Eliminar</button>
+                    <div v-for="archivo in form.archivosExistentes" :key="archivo.id" class="text-green-500 flex items-center gap-4">
+                        <a :href="`/archivos/${archivo.nombre}`" target="_blank" class="inline-block w-96 overflow-hidden">{{ archivo.nombre }}</a>
+                        
+                        <button type="button" @click="elimiarArchivo(archivo.id)" class="bg-red-500 text-white px-2 py-1 rounded-full">Eliminar</button>
                     </div>
                 </div>
             </div>

@@ -15,10 +15,13 @@ const props = defineProps({
     authUser: Object,
 });
 
+
+
 const tipo = 'equipo';
 const showForm = ref(false);
 const tareaEditar = ref(null);
 const showEquipo = ref(false);
+
 
 const toggleForm = () => {
   showForm.value = !showForm.value;
@@ -162,15 +165,13 @@ const toggleEquipo = () => {
           </div>
       </div>
       
-      <div >
-        <div class="columns-sm  "v-if="sortedAndFilteredTareas.length > 0">
-          <div class="mb-5" v-for="tarea in sortedAndFilteredTareas" :key="tarea.id">
+
+        <div class="columns-sm ">
+          <div class="mb-5" v-for="tarea in sortedAndFilteredTareas" :key="tarea.id"  v-if="sortedAndFilteredTareas.length > 0">
             <TareaLayout  :tarea="tarea" :miembros="miembros" :rol="rol" :authUser="authUser"/>
           </div>
+          <div v-else class="flex justify-center text-center w-full text-gray-500 col-span-full">No hay tareas en el tablón</div>
         </div>
-        
-        <div v-else class="flex justify-center text-center w-full text-gray-500 col-span-full">No hay tareas en el tablón</div>
-      </div>
 
       <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm" @click="closeDivOnClickOutside">
         <div class="w-[22rem] md:w-[70rem] max-w-lg  bg-white rounded-lg shadow-lg">
@@ -180,7 +181,7 @@ const toggleEquipo = () => {
 
       <div v-if="showEquipo" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm" @click="closeDivOnClickOutside">
         <div class="w-[22rem] md:w-[70rem] max-w-lg  bg-white rounded-lg shadow-lg">
-          <Equipo :equipo="equipo" :miembros="miembros" :rol="rol" @closeEquipo="toggleEquipo"/>
+          <Equipo :equipo="equipo" :miembros="miembros" :rol="rol" :aceptado="true" @closeEquipo="toggleEquipo"/>
         </div>
       </div>
 

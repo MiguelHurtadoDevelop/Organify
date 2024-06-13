@@ -5,14 +5,14 @@ import { Link } from '@inertiajs/vue3';
 
 <template>
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-800">
-        <div>
+        <div class="fixed top-0 bg-gray-800 p-4 w-full">
             <Link href="/">
-                <ApplicationLogo class=" w-auto h-20 fill-current text-gray-500" />
+                <ApplicationLogo class=" w-auto h-12 fill-current text-gray-500" />
             </Link>
         </div>
 
         <div
-            class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg"
+            class="w-[22rem] max-h-[40rem] sm:max-w-md mt-24 px-6 py-4 bg-white shadow-md  overflow-auto rounded-lg"
         >
             <slot />
         </div>

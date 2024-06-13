@@ -16,8 +16,13 @@ const props = defineProps({
   rol: {
     type: [String, null],
     required: true
+  },
+  aceptado: {
+    type: Boolean,
+    required: true
   }
 });
+
 
 const emit = defineEmits([ 'closeEquipo']);
 
@@ -206,7 +211,8 @@ const confirmEliminarEquipo = () => {
         <div class="flex justify-center gap-4 mt-5">
           <button v-if="equipo.tipo === 'privado' && rol === null" @click="solicitarUnirse(equipo.id)" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Solicitar Unirse</button>
           <button v-if="equipo.tipo === 'publico' && rol === null" @click="unirseAEquipo(equipo.id)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Unirse</button>
-          <button v-if="rol === 'member'" @click="salirDeEquipo" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Salir del equipo</button>
+          <button v-if="rol === 'member' && aceptado === true " @click="salirDeEquipo" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Salir del equipo</button>
+          <button v-if="rol === 'member' && aceptado === false "  class="px-4 py-2 bg-gray-500 text-white rounded-md ">Solicitud Enviada</button>
         </div>
       </div>
     </div>

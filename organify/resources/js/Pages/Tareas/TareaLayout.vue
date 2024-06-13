@@ -152,9 +152,9 @@ const handleAsignarFormSubmitted = () => {
         <img :src="`/archivos/${tarea.imagen}`" alt="portada" class="w-full h-full object-contain"/>
       </div>
       <div class="p-4">
-        <p class="text-xl font-bold truncate">{{ tarea.titulo }}</p>
-        <p class="text-sm text-gray-600 truncate">{{ tarea.descripcion }}</p>
-        <p v-if="tarea.fecha_ini && tarea.fecha_fin" class="text-sm text-gray-500">{{ formatDate(tarea.fecha_ini, tarea.fecha_fin) }}</p>
+        <p class="text-xl font-bold truncate"><font-awesome-icon :icon="['fas', 'tasks']" class="mr-2 text-gray-700" />{{ tarea.titulo }}</p>
+        <p class="text-sm text-gray-600 truncate"><font-awesome-icon :icon="['fas', 'align-left']" class=" mr-2 text-gray-700" />{{ tarea.descripcion }}</p>
+        <p v-if="tarea.fecha_ini && tarea.fecha_fin" class="text-sm text-gray-500"> <font-awesome-icon :icon="['fas', 'calendar-alt']" class="mr-2" />{{ formatDate(tarea.fecha_ini, tarea.fecha_fin) }}</p>
         <p class="text-gray-700 flex items-center">
               <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-2 text-gray-700" />
 
@@ -180,7 +180,7 @@ const handleAsignarFormSubmitted = () => {
   </div>
 
   <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-blur-sm" @click="closeDivOnClickOutside">
-    <div class="w-full max-w-lg mx-4 bg-white rounded-lg shadow-lg p-6">
+    <div class="w-[22rem] md:w-[70rem] max-w-lg  bg-white rounded-lg shadow-lg">
       <TareasForm :equipoId="equipo" :tipo="tipo" :tarea="tareaEditar" :fechaIni="tareaEditar ? tareaEditar.fecha_ini : ''" :fechaFin="tareaEditar ? tareaEditar.fecha_fin : ''" @formSubmitted="handleFormSubmitted" @closeForm="toggleForm" />
     </div>
   </div>
@@ -291,10 +291,13 @@ const handleAsignarFormSubmitted = () => {
   </div>
 
   <div v-if="showAsignar" @click="closeDivOnClickOutside" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-blur-sm">
-    <div class="w-full max-w-lg mx-4 bg-white rounded-lg shadow-lg p-6">
+    <div class="w-[22rem] md:w-[70rem] max-w-lg p-4 max-h-[35rem] md:max-h-[45rem] bg-gray-800 relative rounded-lg shadow-md overflow-auto">
       <form @submit.prevent="handleAsignarFormSubmitted">
+        <button @click="showAsignar = false" class="text-gray-400 absolute right-2 top-2 text-xl font-bold focus:outline-none">
+            <font-awesome-icon :icon="['fas', 'xmark']" />
+        </button>
         <div class="mt-4">
-          <label for="user_id" class="block text-sm font-medium text-gray-700">Seleccionar miembro</label>
+          <label for="user_id" class="block text-sm font-medium text-white">Seleccionar miembro</label>
           <select id="user_id" v-model="formAsignar.user_id" class="mt-1 block w-full">
             <option value="">Seleccionar miembro</option>
             <option v-for="miembro in miembros" :key="miembro.user.id" :value="miembro.user.id">{{ miembro.user.nombre }}</option>
@@ -303,13 +306,13 @@ const handleAsignarFormSubmitted = () => {
         </div>
 
         <div class="mt-4">
-          <label for="fecha_ini" class="block text-sm font-medium text-gray-700">Fecha de inicio</label>
+          <label for="fecha_ini" class="block text-sm font-medium text-white">Fecha de inicio</label>
           <input type="datetime-local" id="fecha_ini" v-model="formAsignar.fecha_ini" class="mt-1 block w-full"/>
           <InputError :message="formAsignar.errors?.fecha_ini" class="mt-2"/>
         </div>
 
         <div class="mt-4">
-          <label for="fecha_fin" class="block text-sm font-medium text-gray-700">Fecha de fin</label>
+          <label for="fecha_fin" class="block text-sm font-medium text-white">Fecha de fin</label>
           <input type="datetime-local" id="fecha_fin" v-model="formAsignar.fecha_fin" class="mt-1 block w-full"/>
           <InputError :message="formAsignar.errors?.fecha_fin" class="mt-2"/>
         </div>
@@ -317,24 +320,26 @@ const handleAsignarFormSubmitted = () => {
 
         <div class="flex items-center justify-end mt-4">
           <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2 transition-colors duration-200">Asignar Tarea</button>
-          <button @click="showAsignar = false" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 ml-4">Cerrar</button>
         </div>
       </form>
     </div>
   </div>
 
   <div v-if="showAutoasignar" @click="closeDivOnClickOutside" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-blur-sm">
-    <div class="w-full max-w-lg mx-4 bg-white rounded-lg shadow-lg p-6">
+    <div class="w-[22rem] md:w-[70rem] max-w-lg p-4 max-h-[35rem] md:max-h-[45rem] bg-gray-800 relative rounded-lg shadow-md overflow-auto">
       <form @submit.prevent="handleAsignarFormSubmitted">
-        
+        <button @click="showAutoasignar = false" class="text-gray-400 absolute right-2 top-2 text-xl font-bold focus:outline-none">
+            <font-awesome-icon :icon="['fas', 'xmark']" />
+        </button>
+
         <div class="mt-4">
-          <label for="fecha_ini" class="block text-sm font-medium text-gray-700">Fecha de inicio</label>
+          <label for="fecha_ini" class="block text-sm font-medium text-white">Fecha de inicio</label>
           <input type="datetime-local" id="fecha_ini" v-model="formAsignar.fecha_ini" class="mt-1 block w-full"/>
           <InputError :message="formAsignar.errors?.fecha_ini" class="mt-2"/>
         </div>
 
         <div class="mt-4">
-          <label for="fecha_fin" class="block text-sm font-medium text-gray-700">Fecha de fin</label>
+          <label for="fecha_fin" class="block text-sm font-medium text-white">Fecha de fin</label>
           <input type="datetime-local" id="fecha_fin" v-model="formAsignar.fecha_fin" class="mt-1 block w-full"/>
           <InputError :message="formAsignar.errors?.fecha_fin" class="mt-2"/>
         </div>
@@ -342,7 +347,6 @@ const handleAsignarFormSubmitted = () => {
 
         <div class="flex items-center justify-end mt-4">
           <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2 transition-colors duration-200">Asignar Tarea</button>
-          <button @click="showAutoasignar = false" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 ml-4">Cerrar</button>
         </div>
       </form>
     </div>
@@ -358,7 +362,10 @@ const handleAsignarFormSubmitted = () => {
 
   <!-- Modal de confirmación -->
   <div v-if="showConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-blur-sm">
-    <div class="w-full max-w-lg mx-4 bg-white rounded-lg shadow-lg p-6">
+    
+    <div class="w-[22rem] md:w-[70rem] max-w-lg p-4 max-h-[35rem] md:max-h-[45rem] bg-gray-800 relative rounded-lg shadow-md overflow-auto">
+      
+      
       <p class="text-xl font-bold mb-4 text-center text-red-600">¿Estás seguro de que quieres eliminar esta tarea?</p>
       <div class="flex justify-end space-x-2">
         <button @click="eliminarTarea" class="bg-red-600 text-white py-2 px-4 rounded-full hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300">Eliminar</button>

@@ -73,6 +73,10 @@ const obtenerRol = (equipoId) => {
   const MiembroEquipo = props.MiembroEquipos.find(MiembroEquipo => MiembroEquipo.equipo_id === equipoId);
   return MiembroEquipo ? MiembroEquipo.rol : null;
 }
+
+const aceptadoAlEquipo = (equipoId) => {
+  return props.MiembroEquipos.some(MiembroEquipo => MiembroEquipo.equipo_id === equipoId && MiembroEquipo.aceptado === 1);
+}
 </script>
 
 <template>
@@ -108,8 +112,8 @@ const obtenerRol = (equipoId) => {
             </div>
           </div>
           
-          <div class="p-4 flex flex-col justify-center items-center w-full sm:w-auto" v-if="!perteneceAlEquipo(equipo.id)">
-            <template>
+          <div class="p-4 flex flex-col justify-center items-center w-full sm:w-auto" >
+            <template v-if="!perteneceAlEquipo(equipo.id)">
               <button 
                 v-if="equipo.tipo === 'privado'" 
                 @click.stop="solicitarUnirse(equipo.id)"
@@ -137,7 +141,7 @@ const obtenerRol = (equipoId) => {
 
     <div v-if="showEquipo" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm" @click="closeDivOnClickOutside">
       <div class="w-[22rem] md:w-[70rem] max-w-lg bg-white rounded-lg shadow-lg">
-        <Equipo :equipo="equipoShow" :miembros="equipoShow.miembros" :rol="obtenerRol(equipoShow.id)" @closeEquipo="toggleEquipo"/>
+        <Equipo :equipo="equipoShow" :miembros="equipoShow.miembros" :rol="obtenerRol(equipoShow.id)" :aceptado="aceptadoAlEquipo(equipoShow.id)" @closeEquipo="toggleEquipo"/>
       </div>
     </div>
   </AuthenticatedLayout>

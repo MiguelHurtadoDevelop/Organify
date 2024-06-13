@@ -11,6 +11,7 @@ use App\Models\Tarea;
 use App\Http\Controllers\NotificacionController;
 
 
+
 class EquipoController extends Controller
 {
     public function getEquipos()
@@ -283,8 +284,17 @@ class EquipoController extends Controller
         if ($request->hasFile('foto')) {
             $imageName = time().'.'.$request->foto->extension();  
             $request->foto->move(public_path('archivos'), $imageName);
+            // Delete the previous foto file
+            if ($equipo->foto) {
+                $previousFoto = public_path('archivos') . '/' . $equipo->foto;
+                if (file_exists($previousFoto) && $equipo->foto != 'default.jpg') {
+                    unlink($previousFoto);
+                }
+            }
+
             $equipo->foto = $imageName;
         }
+
         if($request->color){
             $notas = Tarea::where('equipo_id', $equipo_id)->get();
             foreach($notas as $nota){
@@ -346,6 +356,14 @@ class EquipoController extends Controller
         MiembroDeEquipo::where('equipo_id', $equipo_id)->delete();
 
         Tarea::where('equipo_id', $equipo_id)->delete();
+
+        // Eliminar la foto del equipo
+        if ($equipo->foto) {
+            $foto = public_path('archivos') . '/' . $equipo->foto;
+            if (file_exists($foto) && $equipo->foto != 'default.jpg') {
+                unlink($foto);
+            }
+        }
 
         $equipo->delete();
 

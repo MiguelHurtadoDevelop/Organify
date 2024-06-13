@@ -15,25 +15,21 @@ defineProps({
     },
 });
 
-
-const imagePreview = ref(null);
 const user = usePage().props.auth.user;
-
-
 
 const form = useForm({
     nombre: user.nombre,
     apellidos: user.apellidos,
     email: user.email,
     foto: user.foto,
+    currentImage: user.foto ? `/archivos/${user.foto}` : null,
 });
 
-const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    form.foto = selectedFile;
-    // Vista previa de la imagen seleccionada
-    imagePreview.value = URL.createObjectURL(selectedFile);
+const handleFileChange = (event) => {
+    form.foto = event.target.files[0];
+    form.currentImage = URL.createObjectURL(event.target.files[0]);
 };
+
 const handleSubmit = async () => {
     const formData = new FormData();
     formData.append('nombre', form.nombre);
@@ -41,53 +37,60 @@ const handleSubmit = async () => {
     formData.append('email', form.email);
     formData.append('foto', form.foto);
 
-    // Realizar la solicitud POST utilizando Inertia.js
     await form.post(route('profile.update'), formData);
-
-    // Puedes manejar el resultado aquí si es necesario
 };
 
 </script>
 
 <template>
-    <section>
+    <section class="bg-white p-6 rounded-lg text-white">
         <header>
-            <h2 class="text-lg font-medium text-gray-900">Profile Information</h2>
-
-            <p class="mt-1 text-sm text-gray-600">
-                Update your account's profile information and email address.
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-medium text-gray-800">Información del Perfil</h2>
+                <Link :href="route('logout')" method="post" as="button" class="px-2 py-1 bg-red-700 rounded-full hover:bg-red-900">
+                    <span class="text-sm font-semibold">Cerrar Sesión</span>
+                </Link>
+            </div>
+            
+            <p class="mt-4 text-md text-gray-800">
+                Actualiza la información del perfil de tu cuenta y la dirección de correo electrónico.
             </p>
         </header>
 
         <form @submit.prevent="handleSubmit" class="mt-6 space-y-6">
-
-            <!-- Foto de Perfil -->
-            <div>
-                <InputLabel for="foto" value="Foto de Perfil" />
-                <input
-                    id="foto"
-                    type="file"
-                    class="mt-1 block w-full"
-                    accept="image/*"
-                    @change="handleFileChange"
-                />
-                <InputError class="mt-2" :message="form.errors.foto" />
-            </div>
-
-            <!-- Mostrar vista previa de la imagen seleccionada (opcional) -->
-            <div v-if="!imagePreview" class="w-24 h-24 mb-3 bg-black rounded-full overflow-hidden">
-                <img class="w-full h-full object-cover" :src="`/archivos/${form.foto}`" alt="Foto de perfil">
-            </div>
-            <div v-else class="w-24 h-24 mb-3 bg-black rounded-full overflow-hidden">
-                <img class="w-full h-full object-cover" :src="imagePreview" alt="Foto de perfil">
+            <div class="mb-4">
+                <div>
+                    <InputLabel for="foto" value="Foto" class="text-gray-800"/>
+                    <div class="flex flex-col items-center justify-center w-full relative">
+                        <input 
+                            type="file" 
+                            id="foto" 
+                            name="foto" 
+                            class="mt-1 hidden w-full z-10 opacity-0 cursor-pointer" 
+                            @change="handleFileChange" 
+                        />
+                        <label 
+                            for="foto" 
+                            class="flex flex-col items-center justify-center w-32 h-32 border-2 border-green-500 border-dashed rounded-full cursor-pointer bg-gray-700 hover:bg-gray-600">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6 relative">
+                                <div v-if="form.currentImage" class="absolute w-32 h-32 flex items-center justify-center bg-black border-2 border-green-500 border-dashed rounded-full cursor-pointer overflow-hidden">
+                                    <img class="w-full h-full object-cover " :src="form.currentImage" alt="Vista previa de la imagen">
+                                </div>
+                                <font-awesome-icon :icon="['fas', 'camera']" class="text-white text-3xl" />
+                                <p class="mb-2 text-xs text-white"><span class="font-semibold">Haz clic para subir</span> o arrastra y suelta</p>
+                            </div>                 
+                        </label>
+                    </div>
+                    <InputError :message="form.errors.foto" class="mt-2 text-red-500"/>
+                </div>
             </div>
             <!-- Nombre -->
             <div>
-                <InputLabel for="nombre" value="Nombre" />
+                <InputLabel for="nombre" value="Nombre" class="text-gray-800" />
                 <TextInput
                     id="nombre"
                     type="text"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full text-white bg-gray-700 border-green-500"
                     v-model="form.nombre"
                     required
                     autofocus
@@ -98,11 +101,11 @@ const handleSubmit = async () => {
 
             <!-- Apellidos -->
             <div>
-                <InputLabel for="apellidos" value="Apellidos" />
+                <InputLabel for="apellidos" value="Apellidos" class="text-gray-800"/>
                 <TextInput
                     id="apellidos"
                     type="text"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full text-white bg-gray-700 border-green-500"
                     v-model="form.apellidos"
                     required
                     autocomplete="apellidos"
@@ -112,11 +115,11 @@ const handleSubmit = async () => {
 
             <!-- Email -->
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Correo electrónico" class="text-gray-800"/>
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full text-white bg-gray-700 border-green-500"
                     v-model="form.email"
                     required
                     autocomplete="username"
@@ -124,18 +127,16 @@ const handleSubmit = async () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            
-
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="text-sm mt-2 text-gray-800">
-                    Your email address is unverified.
+                <p class="text-sm mt-2 text-white">
+                    Tu dirección de correo electrónico no está verificada.
                     <Link
                         :href="route('verification.send')"
                         method="post"
                         as="button"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        class="underline text-sm text-white hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                        Click here to re-send the verification email.
+                        Haz clic aquí para reenviar el correo de verificación.
                     </Link>
                 </p>
 
@@ -143,12 +144,12 @@ const handleSubmit = async () => {
                     v-show="status === 'verification-link-sent'"
                     class="mt-2 font-medium text-sm text-green-600"
                 >
-                    A new verification link has been sent to your email address.
+                    Se ha enviado un nuevo enlace de verificación a tu dirección de correo electrónico.
                 </div>
             </div>
 
             <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+                <PrimaryButton :disabled="form.processing">Guardar</PrimaryButton>
 
                 <Transition
                     enter-active-class="transition ease-in-out"
@@ -156,7 +157,7 @@ const handleSubmit = async () => {
                     leave-active-class="transition ease-in-out"
                     leave-to-class="opacity-0"
                 >
-                    <p v-if="form.recentlySuccessful" class="text-sm text-gray-600">Saved.</p>
+                    <p v-if="form.recentlySuccessful" class="text-sm text-green-600">Guardado.</p>
                 </Transition>
             </div>
         </form>

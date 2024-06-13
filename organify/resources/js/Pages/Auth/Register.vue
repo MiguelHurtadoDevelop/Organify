@@ -9,6 +9,7 @@ import { ref } from 'vue';
 
 
 
+
 const form = useForm({
     nombre: '',
     apellidos: '',
@@ -18,7 +19,13 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    currentImage: null,
 });
+
+const handleFileChange = (event) => {
+    form.foto = event.target.files[0];
+    form.currentImage = URL.createObjectURL(event.target.files[0]);
+};
 
 const submit = () => {
     form.post(route('register'), {
@@ -31,7 +38,39 @@ const submit = () => {
     <GuestLayout>
         <Head title="Register" />
 
+        <h3 class="mt-6 mb-4 text-2xl font-extrabold text-gray-900">Crea tu cuenta:</h3>
+
         <form @submit.prevent="submit" enctype="multipart/form-data">
+
+                <div class="mb-4">
+                <div>
+                    <InputLabel for="foto" value="Foto" class="text-white"/>
+                    <div class="flex flex-col items-center justify-center w-full relative">
+                        <input 
+                            type="file" 
+                            id="foto" 
+                            name="foto" 
+                            class="mt-1 hidden w-full z-10 opacity-0 cursor-pointer" 
+                            @change="handleFileChange" 
+                        />
+                        <label 
+                            for="foto" 
+                            class="flex flex-col items-center justify-center w-52 h-52 border-2 border-green-500 border-dashed rounded-full cursor-pointer bg-gray-700 hover:bg-gray-600">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6 relative">
+                                <div v-if="form.currentImage" class="absolute w-52 h-52 flex items-center justify-center bg-black border-2 border-green-500 border-dashed rounded-full cursor-pointer overflow-hidden">
+                                    <img class="w-full h-full object-contain " :src="form.currentImage" alt="Vista previa de la imagen">
+                                </div>
+                                <font-awesome-icon :icon="['fas', 'camera']" class="text-white text-3xl" />
+                                <p class="mb-2 text-xs text-white"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            </div>                 
+                            
+                        </label>
+                    </div>
+                    <InputError :message="form.errors.foto" class="mt-2 text-red-500"/>
+                </div>
+            </div>
+
+
             <div>
                 <InputLabel for="nombre" value="Nombre" />
 
@@ -78,18 +117,7 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.usuario" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="foto" value="Foto" />
-
-                <input
-                    id="foto"
-                    type="file"
-                    class="mt-1 block w-full"
-                    @input="form.foto = $event.target.files[0]"
-                />
-
-                <InputError class="mt-2" :message="form.errors.foto" />
-            </div>
+            
 
             <div class="mt-4">
                 <InputLabel for="email" value="Email" />
@@ -141,7 +169,7 @@ const submit = () => {
                     :href="route('login')"
                     class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                    Already registered?
+                    ¿Ya tienes una cuenta?
                 </Link>
 
                 <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">

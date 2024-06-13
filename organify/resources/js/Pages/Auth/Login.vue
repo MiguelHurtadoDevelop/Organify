@@ -37,7 +37,8 @@ const submit = () => {
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit">
+        <h3 class="mt-6 mb-4 text-2xl font-extrabold text-gray-900">Inicia sesion con tu cuenta:</h3>
+        <form @submit.prevent="submit" class="">
             <div>
                 <InputLabel for="email" value="Email" />
 
@@ -90,5 +91,11 @@ const submit = () => {
                 </PrimaryButton>
             </div>
         </form>
+        <p class="mt-4 text-center text-sm text-gray-600">
+            ¿Todavía no tienes cuenta?
+            <Link href="/register" class="font-medium text-gray-600 hover:text-gray-500">
+                Registrate
+            </Link>
+        </p>
     </GuestLayout>
 </template>
