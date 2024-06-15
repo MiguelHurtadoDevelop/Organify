@@ -61,13 +61,13 @@ class TareaController extends Controller
     public function createPersonal(Request $request)
     {
         $request->validate([
-            'titulo' => 'required',
-            'descripcion' => 'required',
+            'titulo' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:255',
             'fecha_ini' => 'nullable|date',
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_ini',
-            'prioridad' => 'required',
+            'prioridad' => 'required|string|max:255',
             'color' => 'nullable|string', // Validación para el campo color
-            'portada' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'portada' => 'nullable|mimes:jpeg,png,gif,webp,svg,bmp,tiff,ico|max:2048',
             'archivos.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048', // Validación para múltiples archivos
         ]);
 
@@ -146,13 +146,13 @@ class TareaController extends Controller
     public function updatePersonal(Request $request, Tarea $tarea)
     { 
         $request->validate([
-            'titulo' => 'required',
-            'descripcion' => 'required',
+            'titulo' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:255',
             'fecha_ini' => 'nullable|date',
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_ini',
-            'prioridad' => 'required',
+            'prioridad' => 'required|string|max:255',
             'color' => 'nullable|string', // Validación para el campo color
-            'portada' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'portada' => 'nullable|mimes:jpeg,png,gif,webp,svg,bmp,tiff,ico|max:2048',
             'archivos.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048', // Validación para múltiples archivos
         ]);
         
@@ -215,15 +215,15 @@ class TareaController extends Controller
     public function createEquipo(Request $request)
     {
         $request->validate([
-            'titulo' => 'required',
-            'descripcion' => 'required',
+            'titulo' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:255',
             'fecha_ini' => 'nullable|date',
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_ini',
-            'prioridad' => 'required',
+            'prioridad' => 'required|string|max:255',
             'equipo_id' => 'required',
-            'color' => 'nullable|string', // Validación para el campo color
-            'portada' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'archivos.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048', // Validación para múltiples archivos
+            'color' => 'nullable|string', 
+            'portada' => 'nullable|mimes:jpeg,png,gif,webp,svg,bmp,tiff,ico|max:2048',
+            'archivos.*' => 'nullable|file|mimetypes:image/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-rar-compressed,audio/mpeg,video/mp4|size:max:2048', 
         ]);
 
         $portadaName = null;
@@ -277,7 +277,7 @@ class TareaController extends Controller
         if ($miembro->rol != 'manager') {
             foreach ($managers as $manager) {
                 NotificacionController::createNotificacion(new Request([
-                    'titulo' => auth()->user()->nombre . ' ' . auth()->user()->apellido . 'ha creado una tarea en el equipo: ' . $miembro->equipo->nombre,
+                    'titulo' => auth()->user()->nombre . ' ' . auth()->user()->apellido . ' ha creado una tarea en el equipo: ' . $miembro->equipo->nombre,
                     'descripcion' => 'Te has unido al equipo: ' . $miembro->equipo->nombre,
                     'tipo' => 'solicitudTarea',
                     'user_id' => $manager->user_id,
@@ -294,14 +294,16 @@ class TareaController extends Controller
     public function updateEquipo(Request $request, Tarea $tarea)
     {
         $request->validate([
-            'titulo' => 'required',
-            'descripcion' => 'required',
+            'titulo' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:255',
             'fecha_ini' => 'nullable|date',
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_ini',
-            'prioridad' => 'required',
+            'prioridad' => 'required|string|max:255',
             'equipo_id' => 'required',
             'color' => 'nullable|string', // Validación para el campo color
-            'portada' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'portada' => 'nullable|mimes:jpeg,png,gif,webp,svg,bmp,tiff,ico|max:2048',
+            'archivos.*' => 'nullable|file|mimetypes:image/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-rar-compressed,audio/mpeg,video/mp4|size:max:2048',
+
         ]);
 
         $portadaName = $tarea->imagen;
@@ -374,6 +376,20 @@ class TareaController extends Controller
 
     public function tareasTablonEquipo($equipo_id)
     {
+        $equipo = Equipo::find($equipo_id);
+
+        if(!$equipo){
+            return redirect()->route('equipos');
+        }
+
+        $usuarioMiembro = MiembroDeEquipo::where('equipo_id', $equipo_id)
+                                ->where('user_id', auth()->user()->id)
+                                ->first();
+
+        if(!$usuarioMiembro){
+            return redirect()->route('equipos');
+        }   
+
         $tareasTablonEquipo = Tarea::where('equipo_id', $equipo_id)
                         ->where('tipo', 'equipo')
                         ->where('aceptada', 1)
@@ -388,14 +404,12 @@ class TareaController extends Controller
             $tarea->archivos = $archivos;
 
         }
-        $equipo = Equipo::find($equipo_id);
+        
 
         $miembros = MiembroDeEquipo::where('equipo_id', $equipo->id)->get();
 
 
-        $usuarioMiembro = MiembroDeEquipo::where('equipo_id', $equipo->id)
-                                ->where('user_id', auth()->user()->id)
-                                ->first();
+        
 
         if($usuarioMiembro){
             $rol = $usuarioMiembro->rol;
@@ -444,7 +458,7 @@ class TareaController extends Controller
 
         NotificacionController::createNotificacion(new Request([
             'titulo' => 'Se te ha asignado una tarea',
-            'descripcion' => 'Se te ha asignado la tarea: ' . $tarea->titulo . ' en el equipo: ' . $tarea->equipo->nombre,
+            'descripcion' => 'Se te ha asignado la tarea: <strong>' . $tarea->titulo . '</strong> en el equipo: <strong>' . $tarea->equipo->nombre . '</strong>',
             'tipo' => 'solicitudTarea',
             'user_id' => $request->user_id,
         ]));

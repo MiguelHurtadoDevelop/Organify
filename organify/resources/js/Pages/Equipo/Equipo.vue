@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
 import { defineProps, ref } from 'vue';
+import heic2any from 'heic2any';
 
 const props = defineProps({
   equipo: {
@@ -32,7 +33,6 @@ const solicitarUnirse = (id) => {
     equipo_id: id  
   }, {
     onSuccess: () => {
-      console.log('Solicitud enviada al equipo con id:', id);
     }
   });
 }
@@ -42,7 +42,6 @@ const unirseAEquipo = (id) => {
     equipo_id: id  
   }, {
     onSuccess: () => {
-      console.log('Unido al equipo con id:', id);
     }
   });
 }
@@ -62,7 +61,6 @@ const confirmSalirDeEquipo = () => {
     equipo_id: props.equipo.id  
   }, {
     onSuccess: () => {
-      console.log('Saliste del equipo con id:', props.equipo.id);
       showLeaveModal.value = false;
     }
   });
@@ -78,7 +76,6 @@ const confirmExpulsarMiembro = () => {
     miembro_id: miembroAExpulsar.value
   }, {
     onSuccess: () => {
-      console.log('Miembro expulsado con id:', miembroAExpulsar.value);
       showExpulsionModal.value = false;
     }
   });
@@ -91,17 +88,37 @@ const equipoColor = ref(props.equipo.color);
 const equipoFoto = ref(null);
 const equipoFotoPreview = ref(`/archivos/${props.equipo.foto}`);
 
-const handleFileChange = (event) => {
+const handleFileChange = async (event) => {
   const file = event.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      equipoFotoPreview.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-    equipoFoto.value = file;
+    if (file.name.split('.').pop().toLowerCase() === 'heic'){
+      try {
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: "image/png",
+        });
+        const convertedFile = new File([convertedBlob], file.name.split('.')[0] + '.png', { type: "image/png" });
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          equipoFotoPreview.value = e.target.result;
+        };
+        reader.readAsDataURL(convertedFile);
+        equipoFoto.value = convertedFile;
+      } catch (error) {
+        console.error("Error converting HEIC to PNG: ", error);
+      }
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        equipoFotoPreview.value = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      equipoFoto.value = file;
+    }
   }
 };
+
 
 const guardarCambios = () => {
   const formData = new FormData();
@@ -115,7 +132,6 @@ const guardarCambios = () => {
   router.post(route('equipo.update', props.equipo.id), formData, {
     equipo_id: props.equipo.id ,
     onSuccess: () => {
-      console.log('Equipo actualizado');
       ActualizacionGuardada.value = true;
       
     }
@@ -129,8 +145,8 @@ const eliminarEquipo = () => {
 const confirmEliminarEquipo = () => {
   router.delete(route('equipo.delete', props.equipo.id), {
     onSuccess: () => {
-      console.log('Equipo eliminado');
       showDeleteModal.value = false;
+      emit('closeEquipo')
     }
   });
 }
@@ -197,8 +213,8 @@ const confirmEliminarEquipo = () => {
           </div>
           <div>
             <div class="flex gap-3">
-              <button @click="guardarCambios" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 mt-2">Guardar Cambios</button>
-              <button @click="eliminarEquipo" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 mt-2">Eliminar Equipo</button>
+              <button @click="guardarCambios" class="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 mt-2">Guardar Cambios</button>
+              <button @click="eliminarEquipo" class="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 mt-2">Eliminar Equipo</button>
             </div>
             <p v-if="ActualizacionGuardada" class="text-green-600 text-center mt-3">Actualización guardada</p>
           </div>
@@ -218,15 +234,20 @@ const confirmEliminarEquipo = () => {
     </div>
 
     <div class="mt-8 p-6">
-      <h2 class="font-semibold mb-6 text-xl text-center">Miembros</h2>
-      <div class="grid grid-cols-1 gap-6">
-        <div v-for="miembro in miembros" :key="miembro.id" class="flex gap-4 items-center border p-4 rounded-md shadow-sm">
-          <img class="rounded-full w-16 h-16 object-cover" :src="`/archivos/${miembro.user.foto}`" alt="Foto de perfil">
-          <p class="flex-1 text-center">{{ miembro.user.nombre }} <span v-if="miembro.miembro.rol === 'manager'">({{ miembro.miembro.rol }})</span></p>
-          <button v-if="rol === 'manager' && miembro.miembro.rol != 'manager'" @click="expulsarMiembro(miembro.miembro.id)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Expulsar</button>
+        <h2 class="font-semibold mb-6 text-xl text-center">Miembros</h2>
+        <div class="flex flex-col gap-6 items-center justify-center content-center">
+            <div v-for="miembro in miembros" :key="miembro.id" class="">
+              <div v-if="miembro.miembro.aceptado ===1" class="flex items-center justify-start w-72">
+                <img class="rounded-full w-16 h-16 object-cover mr-3" :src="`/archivos/${miembro.user.foto}`" alt="Foto de perfil">
+                <p>{{ miembro.user.nombre }} {{ miembro.user.apellidos }} <span v-if="miembro.miembro.rol === 'manager'">- (<span class="text-green-500">{{ miembro.miembro.rol }}</span>)</span></p>
+                <button v-if="rol === 'manager' && miembro.miembro.rol != 'manager'" @click="expulsarMiembro(miembro.miembro.id)" class="ml-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Expulsar</button>
+              </div>
+                
+            </div>
         </div>
-      </div>
     </div>
+
+
   </div>
 
   <!-- Modal for confirming leaving the team -->

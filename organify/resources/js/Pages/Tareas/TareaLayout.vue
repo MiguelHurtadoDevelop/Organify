@@ -114,7 +114,6 @@ const handleAsignarFormSubmitted = () => {
   formAsignar.post(route('tarea.asignar', props.tarea.id), {
     onSuccess: () => {
       const assignedMember = props.miembros.find(member => member.user.id === formAsignar.user_id);
-      console.log(assignedMember);
       const assignedMessage = `La tarea ha sido asignada a ${assignedMember.user.nombre} el ${formatDate(formAsignar.fecha_ini, formAsignar.fecha_fin )}.`;
       successMessage.value = assignedMessage;
       showSuccessModal.value = true;
@@ -153,7 +152,7 @@ const handleAsignarFormSubmitted = () => {
       </div>
       <div class="p-4">
         <p class="text-xl font-bold truncate"><font-awesome-icon :icon="['fas', 'tasks']" class="mr-2 text-gray-700" />{{ tarea.titulo }}</p>
-        <p class="text-sm text-gray-600 truncate"><font-awesome-icon :icon="['fas', 'align-left']" class=" mr-2 text-gray-700" />{{ tarea.descripcion }}</p>
+        <p v-if="tarea.descripcion" class="text-sm text-gray-600 truncate"><font-awesome-icon :icon="['fas', 'align-left']" class=" mr-2 text-gray-700" />{{ tarea.descripcion }}</p>
         <p v-if="tarea.fecha_ini && tarea.fecha_fin" class="text-sm text-gray-500"> <font-awesome-icon :icon="['fas', 'calendar-alt']" class="mr-2" />{{ formatDate(tarea.fecha_ini, tarea.fecha_fin) }}</p>
         <p class="text-gray-700 flex items-center">
               <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-2 text-gray-700" />
@@ -204,11 +203,11 @@ const handleAsignarFormSubmitted = () => {
               <font-awesome-icon :icon="['fas', 'tasks']" class="mr-2 text-gray-700" />
               {{ tareaDetalles.titulo }}
             </h1>
-            <p class="text-gray-700 text-xl">
+            <p v-if="tareaDetalles.descripcion" class="text-gray-700 text-xl">
               <font-awesome-icon :icon="['fas', 'align-left']" class=" mr-2 text-gray-700" />
               <strong>Descripción:</strong>
             </p>
-            <p class="text-gray-600 text-lg">{{ tareaDetalles.descripcion }}</p>
+            <p v-if="tareaDetalles.descripcion" class="text-gray-600 text-lg">{{ tareaDetalles.descripcion }}</p>
 
           </div>
           <!-- Date and Priority -->
@@ -273,25 +272,40 @@ const handleAsignarFormSubmitted = () => {
         
         <!-- Buttons -->
         <div class="flex md:flex-col justify-between md:justify-start gap-3 md:pt-12 ">
-          <button @click="editarTarea(tareaDetalles)" v-if="tareaDetalles.tipo === 'personal' || (tareaDetalles.tipo === 'equipo'  && rol === 'manager')" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-30">
-            <font-awesome-icon :icon="['fas', 'pen-to-square']" class="mr-2" /> Editar
+          <button @click="editarTarea(tareaDetalles)" v-if="tareaDetalles.tipo === 'personal' || (tareaDetalles.tipo === 'equipo' && rol === 'manager')" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-35">
+              <font-awesome-icon :icon="['fas', 'pen-to-square']" class="sm:mr-2" /> 
+              <span class="hidden md:inline">
+                  Editar
+              </span>
           </button>
-          <button @click="asignarTarea" v-if="tareaDetalles.tipo === 'equipo' && tareaDetalles.asignada !== 1 && rol === 'manager'" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-30">
-            <font-awesome-icon :icon="['fas', 'user-tag']" class="mr-2" /> Asignar
+          <button @click="asignarTarea" v-if="tareaDetalles.tipo === 'equipo' && tareaDetalles.asignada !== 1 && rol === 'manager'" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-35">
+              <font-awesome-icon :icon="['fas', 'user-tag']" class="sm:mr-2" />
+              <span class="hidden md:inline">
+                  Asignar
+              </span>
           </button>
-          <button @click="autoasignarTarea" v-if="tareaDetalles.tipo === 'equipo' && tareaDetalles.asignada !== 1 && rol != 'manager'" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-30">
-            Pa mi
+          <button @click="autoasignarTarea" v-if="tareaDetalles.tipo === 'equipo' && tareaDetalles.asignada !== 1 && rol != 'manager'" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-35">
+              <font-awesome-icon :icon="['fas', 'user-tag']" class="sm:mr-2" />
+              <span class="hidden md:inline">
+                  Autoasignar
+              </span>
           </button>
-          <button @click="confirmEliminarTarea(tareaDetalles.id)" v-if="tareaDetalles.tipo === 'personal' || (tareaDetalles.tipo === 'equipo' && rol === 'manager')" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-30">
-            <font-awesome-icon :icon="['fas', 'trash-can']" class="mr-2" /> Eliminar
+          <button @click="confirmEliminarTarea(tareaDetalles.id)" v-if="tareaDetalles.tipo === 'personal' || (tareaDetalles.tipo === 'equipo' && rol === 'manager')" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-35">
+              <font-awesome-icon :icon="['fas', 'trash-can']" class="sm:mr-2" />
+              <span class="hidden md:inline">
+                  Eliminar
+              </span>
           </button>
-        </div>
+      </div>
+
       </div>
     </div>
   </div>
 
   <div v-if="showAsignar" @click="closeDivOnClickOutside" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-blur-sm">
     <div class="w-[22rem] md:w-[70rem] max-w-lg p-4 max-h-[35rem] md:max-h-[45rem] bg-gray-800 relative rounded-lg shadow-md overflow-auto">
+      <h3 class="text-2xl font-bold text-white mb-4">Asignar Tarea</h3>
+      
       <form @submit.prevent="handleAsignarFormSubmitted">
         <button @click="showAsignar = false" class="text-gray-400 absolute right-2 top-2 text-xl font-bold focus:outline-none">
             <font-awesome-icon :icon="['fas', 'xmark']" />
@@ -319,7 +333,7 @@ const handleAsignarFormSubmitted = () => {
         
 
         <div class="flex items-center justify-end mt-4">
-          <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2 transition-colors duration-200">Asignar Tarea</button>
+          <button type="submit" class="text-white bg-green-500 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2 transition-colors duration-200">Asignar Tarea</button>
         </div>
       </form>
     </div>
@@ -327,6 +341,7 @@ const handleAsignarFormSubmitted = () => {
 
   <div v-if="showAutoasignar" @click="closeDivOnClickOutside" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-blur-sm">
     <div class="w-[22rem] md:w-[70rem] max-w-lg p-4 max-h-[35rem] md:max-h-[45rem] bg-gray-800 relative rounded-lg shadow-md overflow-auto">
+      <h3 class="text-2xl font-bold text-white mb-4">Autoasignar Tarea</h3>
       <form @submit.prevent="handleAsignarFormSubmitted">
         <button @click="showAutoasignar = false" class="text-gray-400 absolute right-2 top-2 text-xl font-bold focus:outline-none">
             <font-awesome-icon :icon="['fas', 'xmark']" />
@@ -356,7 +371,7 @@ const handleAsignarFormSubmitted = () => {
   <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-blur-sm">
     <div class="w-full max-w-lg mx-4 bg-white rounded-lg shadow-lg p-6">
       <p class="text-xl font-bold mb-4 text-center text-green-600">{{ successMessage }}</p>
-      <button @click="showSuccessModal = false" class="text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2 transition-colors duration-200 w-full">Cerrar</button>
+      <button @click="showSuccessModal = false" class="text-white bg-blue-600 hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-4 py-2 transition-colors duration-200 w-full">Cerrar</button>
     </div>
   </div>
 

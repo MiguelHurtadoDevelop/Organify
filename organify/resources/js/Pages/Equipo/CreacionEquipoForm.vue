@@ -5,6 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { defineProps, defineEmits, ref, watch } from 'vue';
+import heic2any from 'heic2any';
 
 
 const props = defineProps({
@@ -33,12 +34,32 @@ const form = useForm({
     currentImage: null,
 });
 
-
-
-const handleFileChange = (event) => {
-    form.foto = event.target.files[0];
-    form.currentImage = URL.createObjectURL(event.target.files[0]);
+const handleFileChange = async (event) => {
+    console.log("File change event: ", event.target.files);
+    const file = event.target.files[0];
+    if (file) {
+        console.log("File type: ", file.type);
+        if (file.name.split('.').pop().toLowerCase() === 'heic'){
+            console.log("Converting HEIC to PNG...");
+            try {
+                const convertedBlob = await heic2any({
+                    blob: file,
+                    toType: "image/png",
+                });
+                const convertedFile = new File([convertedBlob], file.name.split('.')[0] + '.png', { type: "image/png" });
+                form.foto = convertedFile;
+                form.currentImage = URL.createObjectURL(convertedFile);
+            } catch (error) {
+                console.error("Error converting HEIC to PNG: ", error);
+            }
+        } else {
+            form.foto = file;
+            form.currentImage = URL.createObjectURL(file);
+        }
+    }
 };
+
+
 
 const submit = () => {
     const routeName = form.id ? 'equipo.update' : 'equipo.create';
@@ -58,8 +79,8 @@ const submit = () => {
             <font-awesome-icon :icon="['fas', 'xmark']" />
         </button>
         
-        <h2 class="text-center text-2xl mt-4 mb-4 text-green-400">¡Vamos a crear un Equipo!</h2>
-        <p class="text-center mb-4">Impulsa la productividad de tu equipo facilitando el acceso a todas las tareas de una forma sencilla.</p>
+        <h2 class="text-center font-mono text-2xl mt-4 mb-4 text-green-400">¡Vamos a crear un Equipo!</h2>
+        <p class="text-center font-mono mb-4">Impulsa la productividad de tu equipo facilitando el acceso a todas las tareas de una forma sencilla.</p>
 
         <div class="mb-4">
             <div>
@@ -96,7 +117,6 @@ const submit = () => {
                 type="text"
                 class="mt-1 block w-full w-full bg-gray-700 text-white border-green-500 "
                 v-model="form.nombre"
-                autofocus
                 autocomplete="nombre"
             />
             <InputError class="mt-2 text-red-500" :message="form.errors.nombre" />

@@ -39,7 +39,6 @@ export default {
     const tareaEliminar = ref(null);
     const showConfirmModal = ref(false);
     
-    console.log(props);
 
     const toggleForm = () => {
       showForm.value = !showForm.value;
@@ -240,7 +239,7 @@ export default {
     </div>
 
     <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center form-overlay bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm" @click="closeFormOnClickOutside">
-      <div class="w-full max-w-lg bg-white rounded-lg shadow-lg p-6">
+      <div class="w-[22rem] md:w-[70rem] max-w-lg  bg-white rounded-lg shadow-lg">
         <TareasForm :tipo="tipo" :tarea="tareaEditar" :fechaIni="fecha_ini" :fechaFin="fecha_fin" @formSubmitted="handleFormSubmitted" @closeForm="toggleForm" />
       </div>
     </div>
@@ -265,11 +264,11 @@ export default {
                 <font-awesome-icon :icon="['fas', 'tasks']" class="mr-2 text-gray-700" />
                 {{ tareaDetalles.titulo }}
               </h1>
-              <p class="text-gray-700 text-xl">
+              <p v-if="tareaDetalles.descripcion" class="text-gray-700 text-xl">
                 <font-awesome-icon :icon="['fas', 'align-left']" class=" mr-2 text-gray-700" />
                 <strong>Descripción:</strong>
               </p>
-              <p class="text-gray-600 text-lg">{{ tareaDetalles.descripcion }}</p>
+              <p v-if="tareaDetalles.descripcion" class="text-gray-600 text-lg">{{ tareaDetalles.descripcion }}</p>
 
             </div>
             <!-- Date and Priority -->

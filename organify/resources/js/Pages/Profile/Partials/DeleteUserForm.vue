@@ -38,7 +38,7 @@ const closeModal = () => {
 <template>
     <section class="bg-white p-6 rounded-lg text-white space-y-6">
         <header>
-            <h2 class="text-lg font-medium text-gray-800">Eliminar Cuenta</h2>
+            <h2 class="text-lg font-mono font-medium text-gray-800">Eliminar Cuenta</h2>
             <p class="mt-1 text-sm text-gray-800">
                 Una vez eliminada su cuenta, todos sus recursos y datos se borrarán permanentemente. 
                 Antes de eliminar su cuenta, descargue los datos o la información que desee conservar.
@@ -57,7 +57,7 @@ const closeModal = () => {
                 </p>
 
                 <div class="mt-6">
-                    <InputLabel for="password" value="Password" class="text-gray-800 sr-only" />
+                    <InputLabel for="password" value="Contraseña" class="text-gray-800 sr-only" />
                     <TextInput
                         id="password"
                         ref="passwordInput"

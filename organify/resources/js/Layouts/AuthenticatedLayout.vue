@@ -54,40 +54,40 @@ const closeMobileMenu = () => {
 }
 
 const aceptarUsuario = (usuarioId, equipoId, notificacionId) => {
+ console.log('aceptando usuario' + notificacionId)
   eliminarNotificacion(notificacionId);
   router.get(route('equipo.aceptarSolicitud', { equipo_id: equipoId, user: usuarioId }), {
     onSuccess: () => {
-      console.log('Aceptando usuario', usuarioId, 'en equipo', equipoId);
-      
+      console.log('Usuario aceptado')
     }
   });
 }
 
 const rechazarUsuario = (usuarioId, equipoId , notificacionId) => {
+  console.log('rechazando usuario' + notificacionId)
   eliminarNotificacion(notificacionId);
   router.get(route('equipo.rechazarSolicitud', { equipo_id: equipoId, user: usuarioId }), {
     onSuccess: () => {
-      console.log('Rechazando usuario', usuarioId, 'en equipo', equipoId);
-      
+      console.log('Usuario rechazado')
     }
   });
 }
 
 const aceptarTarea = (tareaId , notificacionId) => {
+  console.log('aceptando tarea'.notificacionId)
   eliminarNotificacion(notificacionId);
   router.get(route('tarea.aceptar', tareaId), {
     onSuccess: () => {
-      console.log('Aceptando tarea', tareaId);
       
     }
   });
 }
 
 const rechazarTarea = (tareaId, notificacionId ) => {
+  console.log('rechazando tarea'.notificacionId)
   eliminarNotificacion(notificacionId);
   router.get(route('tarea.rechazar', tareaId), {
     onSuccess: () => {
-      console.log('Rechazando tarea', tareaId);
       
     }
   });
@@ -103,11 +103,12 @@ const decodeData = (data) => {
 }
 
 const eliminarNotificacion = (notificacionId) => {
+  console.log('eliminando notificacion' + notificacionId)
   notificaciones.value = notificaciones.value.filter(notificacion => notificacion.id !== notificacionId);
   router.post(route('notificacion.eliminar'), {
     id: notificacionId,
     onSuccess: () => {
-      console.log('Eliminando notificación', notificacionId);
+      console.log('Notificacion eliminada')
     }
   });
 }
@@ -116,7 +117,7 @@ const eliminarNotificacion = (notificacionId) => {
 <template>
   
 
-  <div class="flex h-screen">
+  <div class="flex h-screen ">
     <!-- Fixed Sidebar -->
     <nav class="w-72 flex flex-col h-full fixed hidden md:flex border-r-2 border-solid border-gray-800 z-30 bg-gray-800 text-white justify-between">
       <div class="absolute left-4 top-4">
@@ -316,51 +317,51 @@ const eliminarNotificacion = (notificacionId) => {
   <!-- Modal for notifications -->
   <div v-if="showNotifications" class="fixed inset-0 z-50 flex items-center justify-center div-overlay" @click="closeDivOnClickOutside">
     <div class="w-[22rem] md:w-[70rem] max-w-lg p-4 max-h-[35rem] md:max-h-[45rem] bg-gray-800 relative rounded-lg shadow-md overflow-auto">
-      <button @click="showNotifications = false" class="text-gray-400 absolute right-2 top-2 text-xl font-bold focus:outline-none">
+        <button @click="showNotifications = false" class="text-gray-400 absolute right-2 top-2 text-xl font-bold focus:outline-none">
             <font-awesome-icon :icon="['fas', 'xmark']" />
-      </button>
-      <h2 class="text-center text-2xl mt-4 mb-4 text-green-400">Notificaciones</h2>
-      <div class="" v-if="notificaciones.length > 0">
-        <div v-for="notificacion in notificaciones" :key="notificacion.id" class="mt-1 mb-4 p-4 bg-gray-100 rounded-lg shadow-sm relative">
-          <button @click="eliminarNotificacion(notificacion.id)" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <div v-if="notificacion.tipo === 'solicitud'">
-            <h3 class="text-xl font-semibold mb-2">{{ notificacion.titulo }}</h3>
-            <p class="mb-2">{{ notificacion.descripcion }}</p>
-            <div v-if="decodeData(notificacion.data)">
-              <p class="mb-2"><strong>Usuario:</strong> {{ decodeData(notificacion.data).user.nombre }}</p>
-              <p class="mb-4"><strong>Equipo ID:</strong> {{ decodeData(notificacion.data).equipo_id }}</p>
-              <div class="flex justify-end gap-2">
-                <button @click="aceptarUsuario(decodeData(notificacion.data).user.id, decodeData(notificacion.data).equipo_id, notificacion.id)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Aceptar</button>
-                <button @click="rechazarUsuario(decodeData(notificacion.data).user.id, decodeData(notificacion.data).equipo_id , notificacion.id)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Rechazar</button>
-              </div>
+        </button>
+        <h2 class="text-center font-mono text-2xl mt-4 mb-4 text-green-400">Notificaciones</h2>
+        <div v-if="notificaciones.length > 0">
+            <div v-for="notificacion in notificaciones" :key="notificacion.id" class="mt-1 mb-4 p-4 bg-gray-100 rounded-lg shadow-sm relative">
+                <button @click="eliminarNotificacion(notificacion.id)" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div v-if="notificacion.tipo === 'solicitud'">
+                    <h3 class="text-xl font-semibold mb-2">{{ notificacion.titulo }}</h3>
+                    <p class="mb-2" v-html="notificacion.descripcion"></p>
+                    <div v-if="decodeData(notificacion.data)">
+                        <p class="mb-2"><strong>Usuario:</strong> {{ decodeData(notificacion.data).user.nombre }}</p>
+                        <p class="mb-4"><strong>Equipo:</strong> {{ decodeData(notificacion.data).equipo_nombre }}</p>
+                        <div class="flex justify-end gap-2">
+                            <button @click="aceptarUsuario(decodeData(notificacion.data).user.id, decodeData(notificacion.data).equipo_id, notificacion.id)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Aceptar</button>
+                            <button @click="rechazarUsuario(decodeData(notificacion.data).user.id, decodeData(notificacion.data).equipo_id , notificacion.id)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Rechazar</button>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="notificacion.tipo === 'solicitudTarea'">
+                    <h3 class="text-xl font-semibold mb-2">{{ notificacion.titulo }}</h3>
+                    <p class="mb-2" v-html="notificacion.descripcion"></p>
+                    <div v-if="decodeData(notificacion.data)">
+                        <div class="flex justify-end gap-2">
+                            <button @click="aceptarTarea(decodeData(notificacion.data).tarea , notificacion.id)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Aceptar</button>
+                            <button @click="rechazarTarea(decodeData(notificacion.data).tarea , notificacion.id)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Rechazar</button>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="notificacion.tipo === 'aceptado' || notificacion.tipo === 'unido' || notificacion.tipo === 'salido' || notificacion.tipo === 'abandono' || notificacion.tipo === 'rechazado'">
+                    <h3 class="text-xl font-semibold mb-2">{{ notificacion.titulo }}</h3>
+                    <p v-html="notificacion.descripcion"></p>
+                </div>
             </div>
-          </div>
-          <div v-if="notificacion.tipo === 'solicitudTarea'">
-            <h3 class="text-xl font-semibold mb-2">{{ notificacion.titulo }}</h3>
-            <p class="mb-2">{{ notificacion.descripcion }}</p>
-            <div v-if="decodeData(notificacion.data)">
-              <div class="flex justify-end gap-2">
-                <button @click="aceptarTarea(decodeData(notificacion.data).tarea , notificacion.id)" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Aceptar</button>
-                <button @click="rechazarTarea(decodeData(notificacion.data).tarea , notificacion.id)" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Rechazar</button>
-              </div>
-            </div>
-          </div>
-          <div v-else-if="notificacion.tipo === 'aceptado' || notificacion.tipo === 'unido' || notificacion.tipo === 'salido' || notificacion.tipo === 'abandono'">
-            <h3 class="text-xl font-semibold mb-2">{{ notificacion.titulo }}</h3>
-            <p>{{ notificacion.descripcion }}</p>
-          </div>
         </div>
-      </div>
-      <div v-else class="text-center text-white">
-        <p>No hay notificaciones</p>
-      </div>
-      
+        <div v-else class="text-center text-white">
+            <p>No hay notificaciones</p>
+        </div>
     </div>
-  </div>
+</div>
+
 </template>
 
 <style scoped>

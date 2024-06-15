@@ -19,7 +19,7 @@ class ProfileUpdateRequest extends FormRequest
             'nombre' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
             'apellidos' => ['required', 'string', 'max:255'],
-            'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'foto' => 'nullable|mimes:jpeg,png,gif,webp,svg,bmp,tiff,ico|max:2048',
         ];
     }
 }

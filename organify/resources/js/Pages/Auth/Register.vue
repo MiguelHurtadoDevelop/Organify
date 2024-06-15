@@ -6,6 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import heic2any from 'heic2any';
 
 
 
@@ -22,10 +23,31 @@ const form = useForm({
     currentImage: null,
 });
 
-const handleFileChange = (event) => {
-    form.foto = event.target.files[0];
-    form.currentImage = URL.createObjectURL(event.target.files[0]);
+const handleFileChange = async (event) => {
+    console.log("File change event: ", event.target.files);
+    const file = event.target.files[0];
+    if (file) {
+        console.log("File type: ", file.type);
+        if (file.name.split('.').pop().toLowerCase() === 'heic'){
+            console.log("Converting HEIC to PNG...");
+            try {
+                const convertedBlob = await heic2any({
+                    blob: file,
+                    toType: "image/png",
+                });
+                const convertedFile = new File([convertedBlob], file.name.split('.')[0] + '.png', { type: "image/png" });
+                form.foto = convertedFile;
+                form.currentImage = URL.createObjectURL(convertedFile);
+            } catch (error) {
+                console.error("Error converting HEIC to PNG: ", error);
+            }
+        } else {
+            form.foto = file;
+            form.currentImage = URL.createObjectURL(file);
+        }
+    }
 };
+
 
 const submit = () => {
     form.post(route('register'), {
@@ -50,7 +72,7 @@ const submit = () => {
                             type="file" 
                             id="foto" 
                             name="foto" 
-                            class="mt-1 hidden w-full z-10 opacity-0 cursor-pointer" 
+                            class="mt-1 hidden w-full  opacity-0 cursor-pointer" 
                             @change="handleFileChange" 
                         />
                         <label 
@@ -79,7 +101,6 @@ const submit = () => {
                     type="text"
                     class="mt-1 block w-full"
                     v-model="form.nombre"
-                    required
                     autofocus
                     autocomplete="nombre"
                 />
@@ -95,7 +116,6 @@ const submit = () => {
                     type="text"
                     class="mt-1 block w-full"
                     v-model="form.apellidos"
-                    required
                     autocomplete="apellidos"
                 />
 
@@ -110,7 +130,6 @@ const submit = () => {
                     type="text"
                     class="mt-1 block w-full"
                     v-model="form.usuario"
-                    required
                     autocomplete="usuario"
                 />
 
@@ -120,14 +139,13 @@ const submit = () => {
             
 
             <div class="mt-4">
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Correo Electrónico" />
 
                 <TextInput
                     id="email"
                     type="email"
                     class="mt-1 block w-full"
                     v-model="form.email"
-                    required
                     autocomplete="username"
                 />
 
@@ -135,14 +153,13 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Contraseña" />
 
                 <TextInput
                     id="password"
                     type="password"
                     class="mt-1 block w-full"
                     v-model="form.password"
-                    required
                     autocomplete="new-password"
                 />
 
@@ -150,14 +167,13 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password_confirmation" value="Confirm Password" />
+                <InputLabel for="password_confirmation" value="Confirmar Contraseña" />
 
                 <TextInput
                     id="password_confirmation"
                     type="password"
                     class="mt-1 block w-full"
                     v-model="form.password_confirmation"
-                    required
                     autocomplete="new-password"
                 />
 
@@ -173,7 +189,7 @@ const submit = () => {
                 </Link>
 
                 <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Register
+                    Registrarse
                 </PrimaryButton>
             </div>
         </form>

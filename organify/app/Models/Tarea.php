@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Tarea extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = 'tareas';
 
@@ -26,11 +26,11 @@ class Tarea extends Model
         'asignada',
         'user_id',
         'equipo_id',
-        'color' // Añadir este campo
+        'color' 
     ];
 
     protected $casts = [
-        'archivos' => 'array', // Cast archivos as an array
+        'archivos' => 'array', 
     ];
     
     public function user()

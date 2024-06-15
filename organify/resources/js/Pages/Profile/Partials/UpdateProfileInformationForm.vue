@@ -5,6 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import heic2any from 'heic2any';
 
 defineProps({
     mustVerifyEmail: {
@@ -25,10 +26,32 @@ const form = useForm({
     currentImage: user.foto ? `/archivos/${user.foto}` : null,
 });
 
-const handleFileChange = (event) => {
-    form.foto = event.target.files[0];
-    form.currentImage = URL.createObjectURL(event.target.files[0]);
+
+const handleFileChange = async (event) => {
+    console.log("File change event: ", event.target.files);
+    const file = event.target.files[0];
+    if (file) {
+        console.log("File type: ", file.type);
+        if (file.name.split('.').pop().toLowerCase() === 'heic'){
+            console.log("Converting HEIC to PNG...");
+            try {
+                const convertedBlob = await heic2any({
+                    blob: file,
+                    toType: "image/png",
+                });
+                const convertedFile = new File([convertedBlob], file.name.split('.')[0] + '.png', { type: "image/png" });
+                form.foto = convertedFile;
+                form.currentImage = URL.createObjectURL(convertedFile);
+            } catch (error) {
+                console.error("Error converting HEIC to PNG: ", error);
+            }
+        } else {
+            form.foto = file;
+            form.currentImage = URL.createObjectURL(file);
+        }
+    }
 };
+
 
 const handleSubmit = async () => {
     const formData = new FormData();
@@ -46,7 +69,7 @@ const handleSubmit = async () => {
     <section class="bg-white p-6 rounded-lg text-white">
         <header>
             <div class="flex justify-between items-center">
-                <h2 class="text-xl font-medium text-gray-800">Información del Perfil</h2>
+                <h2 class="text-xl font-mono font-medium text-gray-800">Información del Perfil</h2>
                 <Link :href="route('logout')" method="post" as="button" class="px-2 py-1 bg-red-700 rounded-full hover:bg-red-900">
                     <span class="text-sm font-semibold">Cerrar Sesión</span>
                 </Link>
@@ -62,11 +85,12 @@ const handleSubmit = async () => {
                 <div>
                     <InputLabel for="foto" value="Foto" class="text-gray-800"/>
                     <div class="flex flex-col items-center justify-center w-full relative">
+                        
                         <input 
                             type="file" 
                             id="foto" 
                             name="foto" 
-                            class="mt-1 hidden w-full z-10 opacity-0 cursor-pointer" 
+                            class="mt-1 hidden w-full  opacity-0 cursor-pointer" 
                             @change="handleFileChange" 
                         />
                         <label 
@@ -78,6 +102,9 @@ const handleSubmit = async () => {
                                 </div>
                                 <font-awesome-icon :icon="['fas', 'camera']" class="text-white text-3xl" />
                                 <p class="mb-2 text-xs text-white"><span class="font-semibold">Haz clic para subir</span> o arrastra y suelta</p>
+                                <div class="absolute left-0 top-0 text-lg text-white bg-black rounded-full py-1 px-2">
+                                    <font-awesome-icon :icon="['fas', 'camera']" />
+                                </div>
                             </div>                 
                         </label>
                     </div>
@@ -92,7 +119,6 @@ const handleSubmit = async () => {
                     type="text"
                     class="mt-1 block w-full text-white bg-gray-700 border-green-500"
                     v-model="form.nombre"
-                    required
                     autofocus
                     autocomplete="nombre"
                 />
@@ -107,7 +133,6 @@ const handleSubmit = async () => {
                     type="text"
                     class="mt-1 block w-full text-white bg-gray-700 border-green-500"
                     v-model="form.apellidos"
-                    required
                     autocomplete="apellidos"
                 />
                 <InputError class="mt-2" :message="form.errors.apellidos" />
@@ -121,7 +146,6 @@ const handleSubmit = async () => {
                     type="email"
                     class="mt-1 block w-full text-white bg-gray-700 border-green-500"
                     v-model="form.email"
-                    required
                     autocomplete="username"
                 />
                 <InputError class="mt-2" :message="form.errors.email" />

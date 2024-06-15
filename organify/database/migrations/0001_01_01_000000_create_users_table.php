@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('apellidos');
             $table->string('usuario')->unique();
-            $table->string('foto')->default('default.jpg');
+            $table->string('foto')->default('defaultUser.jpg');
             $table->boolean('confiramdo')->default(false);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();

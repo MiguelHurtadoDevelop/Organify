@@ -10,9 +10,11 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons'; // Importa todos los iconos sólidos
+import { fab } from '@fortawesome/free-brands-svg-icons'; // Importa todos los iconos de marcas
 
 
 library.add(fas); // Añade todos los iconos a la biblioteca
+library.add(fab); // Añade todos los iconos de marcas a la biblioteca
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';

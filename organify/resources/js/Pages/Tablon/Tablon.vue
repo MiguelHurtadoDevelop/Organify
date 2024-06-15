@@ -91,7 +91,7 @@ const updateSelectedStatus = (event) => {
   <AuthenticatedLayout>
     <div class="mb-5">
       <!-- Sort and Filter controls -->
-      <h1 class="text-3xl font-semibold flex justify-center text-gray-900 mb-4">Tablón Personal</h1>
+      <h1 class="text-3xl font-mono font-semibold flex justify-center text-gray-800 mb-4">Tablón Personal</h1>
       <div class="flex gap-5 flex-col justify-center mb-6 lg:flex-row items-start  items-center">
         <div class="relative h-10 w-72 min-w-[200px]">
             <select id="sortOrder" v-model="sortOrder" @change="updateSortOrder"
@@ -123,13 +123,13 @@ const updateSelectedStatus = (event) => {
       </div>
       
 
-        <div class="columns-sm ">
-          <div class="mb-5" v-if="sortedAndFilteredTareas.length > 0" v-for="tarea in sortedAndFilteredTareas" :key="tarea.id">
+        <div class=" columns-sm" v-if="sortedAndFilteredTareas.length > 0">
+          <div class="mb-5"  v-for="tarea in sortedAndFilteredTareas" :key="tarea.id">
             <TareaLayout :tarea="tarea" />
           </div>
-          <div v-else class=" flex justify-center text-center w-full text-gray-500 col-span-full">No hay tareas en el tablón</div>
+          
         </div>
-
+        <div v-else class="w-full flex justify-center text-gray-500 ">No hay tareas en el tablón</div>
       
 
       <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm" @click="closeDivOnClickOutside">

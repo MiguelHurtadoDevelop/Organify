@@ -46,7 +46,6 @@ const solicitarUnirse = (id) => {
     equipo_id: id  
   }, {
     onSuccess: () => {
-      console.log('Solicitud enviada al equipo con id:', id);
     }
   });
 }
@@ -56,7 +55,6 @@ const unirseAEquipo = (id) => {
     equipo_id: id  
   }, {
     onSuccess: () => {
-      console.log('Unido al equipo con id:', id);
     }
   });
 }
@@ -84,7 +82,7 @@ const aceptadoAlEquipo = (equipoId) => {
 
   <AuthenticatedLayout>
     <div class="container mx-auto p-4">
-      <h1 class="text-4xl text-center font-bold mb-4 text-gray-800">¿Quieres unirte a un Equipo?</h1>
+      <h1 class="text-4xl font-mono text-center font-bold mb-4 text-gray-800">¿Quieres unirte a un Equipo?</h1>
       <p class="mb-4 text-center">Aquí encontrarás una lista de equipos a los que puedes unirte. Puedes buscar por nombre o descripción.</p>
       <input 
         v-model="searchQuery"
@@ -107,7 +105,7 @@ const aceptadoAlEquipo = (equipoId) => {
             <div class="card-body p-4 flex flex-col justify-between w-full sm:w-auto">
               <div class="">
                 <h5 class="card-title text-2xl font-semibold mb-2">{{ equipo.nombre }}</h5>
-                <p class="card-text text-gray-700">{{ equipo.descripcion.substring(0, 100) }}</p>
+                <p v-if="equipo.descripcion" class="card-text text-gray-700">{{ equipo.descripcion.substring(0, 100) }}</p>
               </div>
             </div>
           </div>

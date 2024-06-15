@@ -18,7 +18,6 @@
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
-        <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
         @inertia
     </body>
 </html>

@@ -18,6 +18,7 @@ Route::get('/', function () {
 });
 
 
+
 Route::delete('tarea/{tarea}', [TareaController::class, 'delete'])->middleware((['auth', 'verified']))->name('tarea.delete');
 
 Route::post('tareaPersonal', [TareaController::class, 'createPersonal'])->middleware((['auth', 'verified']))->name('tareaPersonal.create');
@@ -74,6 +75,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::fallback(function () {
+    return Inertia::render('Errors/404'); // Asegúrate de tener el componente Vue configurado en 'Errors/404'
 });
 
 require __DIR__.'/auth.php';

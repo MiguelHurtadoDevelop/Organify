@@ -31,23 +31,23 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Log in" />
+        <Head title="Inicio Sesión" />
 
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
             {{ status }}
         </div>
 
-        <h3 class="mt-6 mb-4 text-2xl font-extrabold text-gray-900">Inicia sesion con tu cuenta:</h3>
-        <form @submit.prevent="submit" class="">
-            <div>
-                <InputLabel for="email" value="Email" />
+        <h3 class="mt-6 mb-4 text-2xl font-extrabold text-gray-900">Inicia sesión con tu cuenta:</h3>
+        <form @submit.prevent="submit" class="max-w-md mx-auto">
+            <div class="mb-6">
+                <InputLabel for="email" value="Correo Electronico" />
 
                 <TextInput
                     id="email"
                     type="email"
                     class="mt-1 block w-full"
                     v-model="form.email"
-                    required
+                    
                     autofocus
                     autocomplete="username"
                 />
@@ -55,46 +55,47 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+            <div class="mb-6">
+                <InputLabel for="password" value="Contraseña" />
 
                 <TextInput
                     id="password"
                     type="password"
                     class="mt-1 block w-full"
                     v-model="form.password"
-                    required
+                    
                     autocomplete="current-password"
                 />
 
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="block mt-4">
+            <div class="mb-6">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600">Remember me</span>
+                    <span class="ml-2 text-sm text-gray-600">Recuérdame</span>
                 </label>
             </div>
 
-            <div class="flex items-center justify-end mt-4">
+            <div class="flex items-center justify-end mt-6">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    class="text-sm text-gray-600 hover:text-gray-900"
                 >
-                    Forgot your password?
+                    ¿Olvidaste tu contraseña?
                 </Link>
 
-                <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Log in
+                <PrimaryButton class="ml-4 px-6 py-3 text-lg font-semibold bg-green-500 text-white rounded-md hover:bg-green-600" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                    Iniciar sesión
                 </PrimaryButton>
             </div>
         </form>
-        <p class="mt-4 text-center text-sm text-gray-600">
-            ¿Todavía no tienes cuenta?
+
+        <p class="mt-6 text-center text-sm text-gray-600">
+            ¿No tienes una cuenta?
             <Link href="/register" class="font-medium text-gray-600 hover:text-gray-500">
-                Registrate
+                Regístrate
             </Link>
         </p>
     </GuestLayout>

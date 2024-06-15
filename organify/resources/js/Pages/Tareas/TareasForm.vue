@@ -6,6 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { defineProps, defineEmits } from 'vue';
+import heic2any from 'heic2any';
 
 const props = defineProps({
     tarea: Object,
@@ -55,9 +56,29 @@ if (props.tarea) {
     }, { immediate: true });
 }
 
-const handleFileChange = (event) => {
-    form.portada = event.target.files[0];
-    form.currentImage = URL.createObjectURL(event.target.files[0]);
+const handleFileChange = async (event) => {
+    console.log("File change event: ", event.target.files);
+    const file = event.target.files[0];
+    if (file) {
+        console.log("File type: ", file.type);
+        if (file.name.split('.').pop().toLowerCase() === 'heic'){
+            console.log("Converting HEIC to PNG...");
+            try {
+                const convertedBlob = await heic2any({
+                    blob: file,
+                    toType: "image/png",
+                });
+                const convertedFile = new File([convertedBlob], file.name.split('.')[0] + '.png', { type: "image/png" });
+                form.portada = convertedFile;
+                form.currentImage = URL.createObjectURL(convertedFile);
+            } catch (error) {
+                console.error("Error converting HEIC to PNG: ", error);
+            }
+        } else {
+            form.portada = file;
+            form.currentImage = URL.createObjectURL(file);
+        }
+    }
 };
 
 const handleFilesChange = (event) => {
@@ -97,7 +118,8 @@ const elimiarArchivo = (archivoId) => {
         <button @click="$emit('closeForm')" class="text-gray-400 absolute right-2 top-2 text-xl font-bold focus:outline-none">
             <font-awesome-icon :icon="['fas', 'xmark']" />
         </button>
-        
+        <h2 class="text-2xl text-green-500 font-mono font-bold text-center mb-4">{{ form.id ? 'Editar' : 'Crear' }} tarea {{ tipo ==='personal' ? 'personal' : 'de equipo' }}</h2>
+        <p class="text-center text-sm text-gray-400 mb-4">Completa los detalles a continuación para {{ form.id ? 'actualizar' : 'crear' }} la tarea.</p>
         <div class="mt-3">
             <InputLabel for="portada" value="Portada" class="text-white"/>
             <div class="flex flex-col items-center justify-center w-full relative">

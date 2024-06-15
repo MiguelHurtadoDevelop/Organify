@@ -31,9 +31,9 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
             Se ha enviado un nuevo enlace de verificación a la dirección de correo electrónico que proporcionaste durante el registro.
         </div>
 
-        <form @submit.prevent="submit">
-            <div class="mt-4 flex items-center justify-between">
-                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+        <form @submit.prevent="submit" class="max-w-md mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <PrimaryButton class="px-2 py-1 text-lg font-semibold w-72 bg-green-500 text-white rounded-md hover:bg-green-600" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                     Reenviar Correo Electrónico de Verificación
                 </PrimaryButton>
 

@@ -67,7 +67,7 @@ const sortedAndFilteredTareas = computed(() => {
   if (selectedStatus.value !== 'todas') {
     if (selectedStatus.value === 'asignadas') {
       filteredTareas = filteredTareas.filter(tarea => tarea.asignada);
-    } else if (selectedStatus.value === 'sin asignar') {
+    } else if (selectedStatus.value === 'sinAsignar') {
       filteredTareas = filteredTareas.filter(tarea => !tarea.asignada);
     } else {
       filteredTareas = filteredTareas.filter(tarea => tarea.estado === selectedStatus.value);
@@ -116,7 +116,7 @@ const toggleEquipo = () => {
             <div :style="{ borderColor: equipo.color, boxShadow: `0 2px 4px ${equipo.color}` }" class="w-24 h-24 mb-3 bg-black rounded-full overflow-hidden border-2">
               <img  class="w-full h-full object-cover" :src="`/archivos/${equipo.foto}`" alt="Foto de equipo">
             </div>
-            <p class="text-3xl font-bold">{{ equipo.nombre }}</p>
+            <p class="text-3xl font-mono font-bold">{{ equipo.nombre }}</p>
           </div>
         </div>
 
@@ -157,6 +157,8 @@ const toggleEquipo = () => {
               <option value="to-do">To-Do</option>
               <option value="doing">Doing</option>
               <option value="done">Done</option>
+              <option value="asignadas">Asignadas</option>
+              <option value="sinAsignar">Sin Asignar</option>
             </select>
             <label
               class="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-gray-900 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-gray-900 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-gray-900 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
@@ -166,12 +168,13 @@ const toggleEquipo = () => {
       </div>
       
 
-        <div class="columns-sm ">
-          <div class="mb-5" v-for="tarea in sortedAndFilteredTareas" :key="tarea.id"  v-if="sortedAndFilteredTareas.length > 0">
+        <div class="columns-sm " v-if="sortedAndFilteredTareas.length > 0">
+          <div class="mb-5" v-for="tarea in sortedAndFilteredTareas" :key="tarea.id"  >
             <TareaLayout  :tarea="tarea" :miembros="miembros" :rol="rol" :authUser="authUser"/>
           </div>
-          <div v-else class="flex justify-center text-center w-full text-gray-500 col-span-full">No hay tareas en el tablón</div>
         </div>
+        <div v-else class="w-full flex justify-center text-gray-500 ">No hay tareas en el tablón</div>
+      
 
       <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm" @click="closeDivOnClickOutside">
         <div class="w-[22rem] md:w-[70rem] max-w-lg  bg-white rounded-lg shadow-lg">

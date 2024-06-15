@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^6.5.2",
+        "@fortawesome/free-brands-svg-icons": "^6.5.2",
         "@fortawesome/free-solid-svg-icons": "^6.5.2",
         "@fortawesome/vue-fontawesome": "^3.0.8",
         "@fullcalendar/bootstrap5": "^6.1.13",
@@ -30,6 +31,7 @@
         "@fullcalendar/scrollgrid": "^6.1.13",
         "@fullcalendar/timegrid": "^6.1.13",
         "@fullcalendar/vue3": "^6.1.13",
-        "date-fns": "^3.6.0"
+        "date-fns": "^3.6.0",
+        "heic2any": "^0.0.4"
     }
 }

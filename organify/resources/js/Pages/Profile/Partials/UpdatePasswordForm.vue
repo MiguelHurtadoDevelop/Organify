@@ -36,7 +36,7 @@ const updatePassword = () => {
 <template>
     <section class="bg-white p-6 rounded-lg text-white">
         <header>
-            <h2 class="text-lg font-medium text-gray-800">Actualizar Contraseña</h2>
+            <h2 class="text-lg font-mono font-medium text-gray-800">Actualizar Contraseña</h2>
             <p class="mt-1 text-sm text-gray-800">
                 Asegúrate de que tu cuenta esté usando una contraseña larga y aleatoria para mantenerla segura.
             </p>
@@ -44,7 +44,7 @@ const updatePassword = () => {
 
         <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
             <div>
-                <InputLabel for="current_password" value="Current Password" class="text-gray-800" />
+                <InputLabel for="current_password" value="Contraseña Actual" class="text-gray-800" />
                 <TextInput
                     id="current_password"
                     ref="currentPasswordInput"
@@ -57,7 +57,7 @@ const updatePassword = () => {
             </div>
 
             <div>
-                <InputLabel for="password" value="New Password" class="text-gray-800" />
+                <InputLabel for="password" value="Nueva Contraseña" class="text-gray-800" />
                 <TextInput
                     id="password"
                     ref="passwordInput"
@@ -70,7 +70,7 @@ const updatePassword = () => {
             </div>
 
             <div>
-                <InputLabel for="password_confirmation" value="Confirm Password" class="text-gray-800" />
+                <InputLabel for="password_confirmation" value="Confirmar Contraseña" class="text-gray-800" />
                 <TextInput
                     id="password_confirmation"
                     v-model="form.password_confirmation"
