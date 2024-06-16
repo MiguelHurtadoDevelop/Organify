@@ -37,6 +37,8 @@ class NotificacionController extends Controller
         $notificacion->user_id = $request->user_id;
         $notificacion->data = $request->data; // Asumiendo que 'data' está presente en el request
         $notificacion->save();
+
+        return $notificacion;
     }
 
     /**
@@ -45,7 +47,7 @@ class NotificacionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return void
      */
-    public function deleteNotificacion(Request $request)
+    public static function deleteNotificacion(Request $request)
     {
         // Validar los datos del request
         $request->validate([
@@ -55,5 +57,6 @@ class NotificacionController extends Controller
         // Encontrar la notificación por su ID y eliminarla
         $notificacion = Notificacion::find($request->id);
         $notificacion->delete();
+
     }
 }

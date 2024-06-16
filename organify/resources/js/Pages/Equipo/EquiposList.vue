@@ -1,10 +1,11 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { router, Link, usePage } from '@inertiajs/vue3';
-import { defineProps, ref, computed } from 'vue';
-import Equipo from '@/Pages/Equipo/Equipo.vue';
-import { Head } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; // Importación del layout de autenticación
+import { router, Link, usePage } from '@inertiajs/vue3'; // Importación del enrutador y otras funciones de Inertia
+import { defineProps, ref, computed } from 'vue'; // Importación de funciones de Vue
+import Equipo from '@/Pages/Equipo/Equipo.vue'; // Importación del componente Equipo
+import { Head } from '@inertiajs/vue3'; // Importación del componente Head de Inertia
 
+// Definición de props esperados por el componente
 const props = defineProps({
   Equipos: {
     type: Array,
@@ -15,10 +16,14 @@ const props = defineProps({
   },
 });
 
+// Variable reactiva para el filtro de búsqueda
 const searchQuery = ref('');
+
+// Variables reactivas para manejar la visualización de detalles del equipo
 const showEquipo = ref(false);
 const equipoShow = ref({});
 
+// Función para alternar la visualización de detalles de un equipo
 const toggleEquipo = (equipo) => {
   showEquipo.value = !showEquipo.value;
   if (equipoShow.value !== equipo) {
@@ -28,19 +33,28 @@ const toggleEquipo = (equipo) => {
   }
 }
 
+// Función para cerrar el div al hacer clic fuera de él
 const closeDivOnClickOutside = (event) => {
   if (event.target.classList.contains('div-overlay')) {
     showEquipo.value = false;
+    equipoShow.value = {};
   }
 }
 
+// Computación de equipos filtrados según la búsqueda
 const filteredEquipos = computed(() => {
-  return props.Equipos.filter(equipo => 
-    equipo.nombre.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-    equipo.descripcion.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  if (!props.Equipos) return [];
+  
+  return props.Equipos.filter(equipo => {
+    const nombre = equipo.nombre ? equipo.nombre.toLowerCase() : '';
+    const descripcion = equipo.descripcion ? equipo.descripcion.toLowerCase() : '';
+    const search = searchQuery.value.toLowerCase();
+    
+    return nombre.includes(search) || descripcion.includes(search);
+  });
 });
 
+// Función para solicitar unirse a un equipo
 const solicitarUnirse = (id) => {
   router.post(route('equipo.solicitarUnirse', id), {
     equipo_id: id  
@@ -50,6 +64,7 @@ const solicitarUnirse = (id) => {
   });
 }
 
+// Función para unirse a un equipo
 const unirseAEquipo = (id) => {
   router.post(route('equipo.join', id), {
     equipo_id: id  
@@ -59,23 +74,28 @@ const unirseAEquipo = (id) => {
   });
 }
 
+// Función para verificar si el usuario pertenece a un equipo
 const perteneceAlEquipo = (equipoId) => {
   return props.MiembroEquipos.some(MiembroEquipo => MiembroEquipo.equipo_id === equipoId);
 }
 
+// Función para verificar si se ha solicitado unirse a un equipo
 const solicitadoAlEquipo = (equipoId) => {
   return props.MiembroEquipos.some(MiembroEquipo => MiembroEquipo.equipo_id === equipoId && MiembroEquipo.aceptado === 0);
 }
 
+// Función para obtener el rol del usuario en un equipo
 const obtenerRol = (equipoId) => {
   const MiembroEquipo = props.MiembroEquipos.find(MiembroEquipo => MiembroEquipo.equipo_id === equipoId);
   return MiembroEquipo ? MiembroEquipo.rol : null;
 }
 
+// Función para verificar si el usuario ha sido aceptado en un equipo
 const aceptadoAlEquipo = (equipoId) => {
   return props.MiembroEquipos.some(MiembroEquipo => MiembroEquipo.equipo_id === equipoId && MiembroEquipo.aceptado === 1);
 }
 </script>
+
 
 <template>
   <Head title="Lista de Equipos" />
@@ -99,13 +119,13 @@ const aceptadoAlEquipo = (equipoId) => {
         >
           <div @click="toggleEquipo(equipo)" class="flex flex-col sm:flex-row items-center w-full cursor-pointer">
             <div :style="{ borderColor: equipo.color, boxShadow: `0 2px 4px ${equipo.color}` }" class="w-24 h-24 bg-black rounded-full overflow-hidden border-2 mb-4 sm:mb-0 sm:mr-4">
-              <img class="w-full h-full object-cover" :src="`/archivos/${equipo.foto}`" alt="Foto de equipo">
+              <img class="w-24 h-24  object-cover" :src="`/archivos/${equipo.foto}`" alt="Foto de equipo">
             </div>
 
             <div class="card-body p-4 flex flex-col justify-between w-full sm:w-auto">
               <div class="">
-                <h5 class="card-title text-2xl font-semibold mb-2">{{ equipo.nombre }}</h5>
-                <p v-if="equipo.descripcion" class="card-text text-gray-700">{{ equipo.descripcion.substring(0, 100) }}</p>
+                <h5 class="card-title text-2xl font-semibold mb-2 w-96 truncate">{{ equipo.nombre }}</h5>
+                <p v-if="equipo.descripcion" class="card-text text-gray-700 w-96 truncate">{{ equipo.descripcion }}</p>
               </div>
             </div>
           </div>

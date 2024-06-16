@@ -21,11 +21,7 @@ class ArchivoController extends Controller
      * @return void
      */
     public static function createArchivo(Request $request)
-    {   
-        // Log para depuración
-        \Log::info($request);
-
-        // Validación de los datos de entrada
+    {   // Validación de los datos de entrada
         $request->validate([
             'nombre' => 'required|string|max:255',
             'tarea_id' => 'required|integer',

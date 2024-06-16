@@ -41,9 +41,10 @@ class SolicitudRechazada extends Notification
     {
         $equipo = Equipo::find($this->equipo_id);
         return (new MailMessage)
+                    ->subject('Solicitud rechazada')
                     ->line('Su solicitud de unión ha sido rechazada en el equipo ' . $equipo->nombre)
                     ->action('Lista de equipos', url('equipos'))
-                    ->line('¡Gracias por usar nuestra aplicación!');
+                    ->line('¡Verifica tus solicitudes y únete a otro equipo!');
     }
 
     /**

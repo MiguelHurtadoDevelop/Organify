@@ -1,10 +1,11 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { router } from '@inertiajs/vue3';
-import { defineProps, ref } from 'vue';
-import heic2any from 'heic2any';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; // Importación del layout de autenticación
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'; // Importación del icono FontAwesome
+import { router } from '@inertiajs/vue3'; // Importación del enrutador de Inertia
+import { defineProps, ref } from 'vue'; // Importación de funciones de Vue
+import heic2any from 'heic2any'; // Importación de la librería para convertir HEIC a PNG
 
+// Definición de props esperados por el componente
 const props = defineProps({
   equipo: {
     type: Object,
@@ -24,10 +25,10 @@ const props = defineProps({
   }
 });
 
+// Definición de eventos emitidos por el componente
+const emit = defineEmits(['closeEquipo']);
 
-const emit = defineEmits([ 'closeEquipo']);
-
-
+// Función para solicitar unirse a un equipo
 const solicitarUnirse = (id) => {
   router.post(route('equipo.solicitarUnirse', id), {
     equipo_id: id  
@@ -37,6 +38,7 @@ const solicitarUnirse = (id) => {
   });
 }
 
+// Función para unirse a un equipo
 const unirseAEquipo = (id) => {
   router.post(route('equipo.join', id), {
     equipo_id: id  
@@ -46,16 +48,19 @@ const unirseAEquipo = (id) => {
   });
 }
 
+// Variables reactivas para manejar modales y estado de actualización guardada
 const showLeaveModal = ref(false);
 const showExpulsionModal = ref(false);
 const showDeleteModal = ref(false);
 const miembroAExpulsar = ref(null);
 const ActualizacionGuardada = ref(false);
 
+// Función para mostrar modal de salida de equipo
 const salirDeEquipo = () => {
   showLeaveModal.value = true;
 }
 
+// Función para confirmar salida de equipo
 const confirmSalirDeEquipo = () => {
   router.post(route('equipo.leave', props.equipo.id), {
     equipo_id: props.equipo.id  
@@ -66,11 +71,13 @@ const confirmSalirDeEquipo = () => {
   });
 }
 
+// Función para expulsar a un miembro del equipo
 const expulsarMiembro = (miembroId) => {
   miembroAExpulsar.value = miembroId;
   showExpulsionModal.value = true;
 }
 
+// Función para confirmar expulsión de un miembro
 const confirmExpulsarMiembro = () => {
   router.post(route('equipo.expulsar', miembroAExpulsar.value), {
     miembro_id: miembroAExpulsar.value
@@ -81,17 +88,20 @@ const confirmExpulsarMiembro = () => {
   });
 }
 
+// Variables reactivas para los datos del equipo
 const equipoNombre = ref(props.equipo.nombre);
-const equipoDescripcion = ref(props.equipo.descripcion);
+const equipoDescripcion = ref(props.equipo.descripcion ? props.equipo.descripcion : null);
 const equipoTipo = ref(props.equipo.tipo);
 const equipoColor = ref(props.equipo.color);
 const equipoFoto = ref(null);
 const equipoFotoPreview = ref(`/archivos/${props.equipo.foto}`);
 
+
+// Función para manejar el cambio de archivo de imagen
 const handleFileChange = async (event) => {
   const file = event.target.files[0];
   if (file) {
-    if (file.name.split('.').pop().toLowerCase() === 'heic'){
+    if (file.name.split('.').pop().toLowerCase() === 'heic' || file.name.split('.').pop().toLowerCase() === 'hevc' ){
       try {
         const convertedBlob = await heic2any({
           blob: file,
@@ -119,29 +129,31 @@ const handleFileChange = async (event) => {
   }
 };
 
-
+// Función para guardar los cambios del equipo
 const guardarCambios = () => {
   const formData = new FormData();
   formData.append('nombre', equipoNombre.value);
-  formData.append('descripcion', equipoDescripcion.value);
+  formData.append('descripcion', equipoDescripcion.value ? equipoDescripcion.value : '');
   formData.append('tipo', equipoTipo.value);
   formData.append('color', equipoColor.value);
   if (equipoFoto.value) {
     formData.append('foto', equipoFoto.value);
   }
+
   router.post(route('equipo.update', props.equipo.id), formData, {
     equipo_id: props.equipo.id ,
     onSuccess: () => {
       ActualizacionGuardada.value = true;
-      
     }
   });
 }
 
+// Función para eliminar el equipo
 const eliminarEquipo = () => {
   showDeleteModal.value = true;
 }
 
+// Función para confirmar la eliminación del equipo
 const confirmEliminarEquipo = () => {
   router.delete(route('equipo.delete', props.equipo.id), {
     onSuccess: () => {
@@ -151,6 +163,7 @@ const confirmEliminarEquipo = () => {
   });
 }
 </script>
+
 
 <template>
   <div class="h-[35rem] md:h-[45rem] overflow-auto rounded-md relative bg-gray-800 text-white custom-scrollbar">

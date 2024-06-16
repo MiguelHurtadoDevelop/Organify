@@ -1,11 +1,12 @@
 <script setup>
-import { defineProps, ref } from 'vue';
-import { format, isSameDay } from 'date-fns';
-import { es } from 'date-fns/locale';
-import TareasForm from '@/Pages/Tareas/TareasForm.vue';
-import { router, useForm } from '@inertiajs/vue3';
-import InputError from '@/Components/InputError.vue';
+import { defineProps, ref } from 'vue'; // Importación de funciones de Vue
+import { format, isSameDay } from 'date-fns'; // Importación de funciones de date-fns para manejo de fechas
+import { es } from 'date-fns/locale'; // Importación del locale español para date-fns
+import TareasForm from '@/Pages/Tareas/TareasForm.vue'; // Importación del componente TareasForm
+import { router, useForm } from '@inertiajs/vue3'; // Importación del enrutador y useForm de Inertia
+import InputError from '@/Components/InputError.vue'; // Importación del componente InputError
 
+// Definición de props esperados por el componente
 const props = defineProps({
   tarea: Object,
   miembros: Array|null,
@@ -13,29 +14,32 @@ const props = defineProps({
   authUser: Object|null,
 });
 
+// Constante para el tipo de tarea (personal o de equipo)
 const tipo = props.tarea.tipo;
-const equipo = props.tarea.equipo_id;
-const showForm = ref(false);
-const showDetails = ref(false);
-const showConfirmModal = ref(false);
-const showDeletedModal = ref(false);
-const tareaEliminar = ref(null);
-const tareaDetalles = ref({});
-const tareaEditar = ref(null);
-const showAsignar = ref(false);
-const showSuccessModal = ref(false);
-const successMessage = ref('');
-const deletedMessage = ref('La tarea ha sido eliminada exitosamente.');
-const showAutoasignar = ref(false);
 
+// Variables reactivas para manejar el estado del formulario y detalles de tarea
+const showForm = ref(false); // Variable reactiva para mostrar/ocultar el formulario de tarea
+const showDetails = ref(false); // Variable reactiva para mostrar/ocultar los detalles de la tarea
+const showConfirmModal = ref(false); // Variable reactiva para mostrar/ocultar el modal de confirmación de eliminación
+const showDeletedModal = ref(false); // Variable reactiva para mostrar/ocultar el modal de confirmación de eliminación exitosa
+const tareaEliminar = ref(null); // Referencia reactiva para almacenar la tarea que se va a eliminar
+const tareaDetalles = ref({}); // Referencia reactiva para almacenar los detalles de la tarea mostrada
+const tareaEditar = ref(null); // Referencia reactiva para la tarea que se está editando
+const showAsignar = ref(false); // Variable reactiva para mostrar/ocultar el formulario de asignación de tarea
+const showSuccessModal = ref(false); // Variable reactiva para mostrar/ocultar el modal de éxito después de una acción
+const successMessage = ref(''); // Mensaje de éxito para mostrar en el modal
+const deletedMessage = ref('La tarea ha sido eliminada exitosamente.'); // Mensaje de eliminación exitosa para mostrar en el modal
+const showAutoasignar = ref(false); // Variable reactiva para mostrar/ocultar el formulario de autoasignación de tarea
 
+// Formulario reactiva para asignar tarea
 const formAsignar = useForm({
   tarea_id: props.tarea.id,
-  user_id: '',
-  fecha_ini: props.tarea.fecha_ini || '',
-  fecha_fin: props.tarea.fecha_fin || '',
+  user_id: '', // Usuario asignado
+  fecha_ini: props.tarea.fecha_ini || '', // Fecha de inicio de la tarea (opcional)
+  fecha_fin: props.tarea.fecha_fin || '', // Fecha de fin de la tarea (opcional)
 });
 
+// Función para formatear la fecha de inicio y fin de la tarea
 const formatDate = (startDate, endDate) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -47,18 +51,21 @@ const formatDate = (startDate, endDate) => {
   }
 };
 
+// Función para alternar la visualización del formulario de tarea
 const toggleForm = () => {
   showForm.value = !showForm.value;
   if (!showForm.value) {
-    tareaEditar.value = null;
+    tareaEditar.value = null; // Reiniciar tareaEditar cuando se cierra el formulario
   }
 }
 
+// Función ejecutada cuando se envía el formulario de tarea
 const handleFormSubmitted = () => {
   showForm.value = false;
-  tareaEditar.value = null;
+  tareaEditar.value = null; // Reiniciar tareaEditar después de enviar el formulario
 }
 
+// Función para cerrar el div al hacer clic fuera de él
 const closeDivOnClickOutside = (event) => {
   if (event.target.classList.contains('div-overlay')) {
     showForm.value = false;
@@ -71,6 +78,7 @@ const closeDivOnClickOutside = (event) => {
   }
 }
 
+// Función para abrir los detalles de una tarea específica
 const abrirDetalles = (tarea) => {
   if (tarea) {
     showDetails.value = true;
@@ -78,38 +86,42 @@ const abrirDetalles = (tarea) => {
   }
 }
 
+// Función para eliminar una tarea
 const eliminarTarea = () => {
   router.delete(route('tarea.delete', tareaEliminar.value), {
     onSuccess: () => {
       showDeletedModal.value = true;
       showDetails.value = false;
       showConfirmModal.value = false;
-      
     },
   });
 }
 
+// Función para mostrar el modal de confirmación de eliminación de tarea
 const confirmEliminarTarea = (id) => {
   tareaEliminar.value = id;
   showConfirmModal.value = true;
 }
 
+// Función para editar una tarea
 const editarTarea = (tarea) => {
   showDetails.value = false;
   showForm.value = true;
   tareaEditar.value = tarea;
 }
 
+// Función para mostrar el formulario de asignación de tarea
 const asignarTarea = () => {
   showAsignar.value = true;
 }
 
+// Función para autoasignar una tarea al usuario autenticado
 const autoasignarTarea = () => {
   showAutoasignar.value = true;
-  formAsignar.user_id = props.authUser.id;
-
+  formAsignar.user_id = props.authUser.id; // Asignación automática al usuario autenticado
 }
 
+// Función ejecutada cuando se envía el formulario de asignación de tarea
 const handleAsignarFormSubmitted = () => {
   formAsignar.post(route('tarea.asignar', props.tarea.id), {
     onSuccess: () => {
@@ -117,23 +129,22 @@ const handleAsignarFormSubmitted = () => {
       const assignedMessage = `La tarea ha sido asignada a ${assignedMember.user.nombre} el ${formatDate(formAsignar.fecha_ini, formAsignar.fecha_fin )}.`;
       successMessage.value = assignedMessage;
       showSuccessModal.value = true;
-      formAsignar.reset();
-      showAsignar.value = false;
-      showAutoasignar.value = false;
+      formAsignar.reset(); // Reiniciar el formulario de asignación
+      showAsignar.value = false; // Ocultar el formulario de asignación
+      showAutoasignar.value = false; // Ocultar el formulario de autoasignación
     },
   });
 };
 
-
-  const cambiarEstado = (id, estado) => {
-    router.post(route('tarea.estado', id), {
-        estado: estado,
-      onSuccess: () => {
-        showDetails.value = false;
-      },
-    });
-  }
-
+// Función para cambiar el estado de una tarea
+const cambiarEstado = (id, estado) => {
+  router.post(route('tarea.estado', id), {
+    estado: estado, // Nuevo estado de la tarea
+    onSuccess: () => {
+      showDetails.value = false; // Ocultar los detalles de la tarea después de cambiar el estado
+    },
+  });
+}
 </script>
 
 <template>
@@ -180,7 +191,7 @@ const handleAsignarFormSubmitted = () => {
 
   <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center div-overlay bg-black bg-opacity-50 backdrop-blur-sm" @click="closeDivOnClickOutside">
     <div class="w-[22rem] md:w-[70rem] max-w-lg  bg-white rounded-lg shadow-lg">
-      <TareasForm :equipoId="equipo" :tipo="tipo" :tarea="tareaEditar" :fechaIni="tareaEditar ? tareaEditar.fecha_ini : ''" :fechaFin="tareaEditar ? tareaEditar.fecha_fin : ''" @formSubmitted="handleFormSubmitted" @closeForm="toggleForm" />
+      <TareasForm :equipoId="tareaEditar.equipo_id" :tipo="tipo" :tarea="tareaEditar" :fechaIni="tareaEditar ? tareaEditar.fecha_ini : ''" :fechaFin="tareaEditar ? tareaEditar.fecha_fin : ''" @formSubmitted="handleFormSubmitted" @closeForm="toggleForm" />
     </div>
   </div>
 

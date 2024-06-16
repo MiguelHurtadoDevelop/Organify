@@ -45,7 +45,7 @@ defineProps({
                                     <Link :href="route('equipo.tablon', equipo.id)" preserve-scroll class="flex flex-row w-full">
                                         <div class="flex items-center gap-3">
                                             <img
-                                                class="rounded-full w-24 mb-3 border"
+                                                class="rounded-full w-24 h-24 mb-3 border"
                                                 :style="{ borderColor: equipo.color, boxShadow: `0 2px 4px ${equipo.color}`, objectFit: 'cover' }"
                                                 :src="`/archivos/${equipo.foto}`"
                                                 alt="Foto de perfil"

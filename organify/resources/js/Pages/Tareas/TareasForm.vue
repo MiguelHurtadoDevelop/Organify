@@ -1,45 +1,50 @@
 <script setup>
-import { ref, watch } from 'vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { useForm } from '@inertiajs/vue3';
-import { defineProps, defineEmits } from 'vue';
-import heic2any from 'heic2any';
+import { ref, watch } from 'vue'; // Importación de ref y watch desde Vue 3
+import InputError from '@/Components/InputError.vue'; // Importación del componente InputError
+import InputLabel from '@/Components/InputLabel.vue'; // Importación del componente InputLabel
+import PrimaryButton from '@/Components/PrimaryButton.vue'; // Importación del componente PrimaryButton
+import TextInput from '@/Components/TextInput.vue'; // Importación del componente TextInput
+import { useForm } from '@inertiajs/vue3'; // Importación de useForm desde Inertia.js
+import { defineProps, defineEmits } from 'vue'; // Importación de defineProps y defineEmits desde Vue 3
+import heic2any from 'heic2any'; // Importación de la librería heic2any para convertir archivos HEIC
 
+// Definición de props esperados por el componente
 const props = defineProps({
-    tarea: Object,
-    fechaIni: { type: [Date, String, null] },
-    fechaFin: { type: [Date, String, null] },
-    tipo: String,
-    equipoId: { type: [Number, null], default: null },
+    tarea: Object, // Objeto tarea
+    fechaIni: { type: [Date, String, null] }, // Fecha de inicio de tipo Date, String o null
+    fechaFin: { type: [Date, String, null] }, // Fecha de fin de tipo Date, String o null
+    tipo: String, // Tipo de tarea ('personal' o 'equipo')
+    equipoId: { type: [Number, null], default: null }, // ID del equipo de tipo Number o null (por defecto null)
 });
 
+// Definición de emisiones del componente
 const emit = defineEmits(['formSubmitted', 'closeForm']);
 
+// Función para convertir una fecha a formato ISO local
 function toLocalISOString(date) {
     const tzoffset = date.getTimezoneOffset() * 60000;
     const localISOTime = new Date(date - tzoffset).toISOString().slice(0, 16);
     return localISOTime;
 }
 
+// Uso del hook useForm para manejar el formulario
 const form = useForm({
-    id: null,
-    portada: null,
-    archivos: [],
-    archivosExistentes: [],
-    archivosParaEliminar: [],
-    titulo: '',
-    descripcion: '',
-    fecha_ini: props.fechaIni ? toLocalISOString(new Date(props.fechaIni)) : '',
-    fecha_fin: props.fechaFin ? toLocalISOString(new Date(props.fechaFin)) : '',
-    prioridad: '',
-    equipo_id: props.equipoId || null,
-    color: '#000000',
-    currentImage: null,
+    id: null, // ID de la tarea
+    portada: null, // Archivo de portada de la tarea
+    archivos: [], // Array de archivos adjuntos
+    archivosExistentes: [], // Archivos existentes asociados a la tarea
+    archivosParaEliminar: [], // Archivos a eliminar asociados a la tarea
+    titulo: '', // Título de la tarea
+    descripcion: '', // Descripción de la tarea
+    fecha_ini: props.fechaIni ? toLocalISOString(new Date(props.fechaIni)) : '', // Fecha de inicio (convertida a ISO local si existe)
+    fecha_fin: props.fechaFin ? toLocalISOString(new Date(props.fechaFin)) : '', // Fecha de fin (convertida a ISO local si existe)
+    prioridad: '', // Prioridad de la tarea
+    equipo_id: props.equipoId || null, // ID del equipo asociado a la tarea (si existe)
+    color: '#000000', // Color de la tarea (valor por defecto negro)
+    currentImage: null, // Imagen actual de la tarea
 });
 
+// Observador para actualizar el formulario cuando cambia la tarea
 if (props.tarea) {
     watch(props.tarea, (newVal) => {
         if (newVal) {
@@ -56,13 +61,12 @@ if (props.tarea) {
     }, { immediate: true });
 }
 
+// Función para manejar el cambio de archivo de portada
 const handleFileChange = async (event) => {
-    console.log("File change event: ", event.target.files);
     const file = event.target.files[0];
     if (file) {
-        console.log("File type: ", file.type);
-        if (file.name.split('.').pop().toLowerCase() === 'heic'){
-            console.log("Converting HEIC to PNG...");
+        // Si el archivo es de tipo HEIC, se convierte a PNG antes de asignarlo
+        if (file.name.split('.').pop().toLowerCase() === 'heic' || file.name.split('.').pop().toLowerCase() === 'hevc' ){
             try {
                 const convertedBlob = await heic2any({
                     blob: file,
@@ -81,37 +85,44 @@ const handleFileChange = async (event) => {
     }
 };
 
+// Función para manejar el cambio de archivos adjuntos
 const handleFilesChange = (event) => {
     form.archivos = [...event.target.files];
 };
 
+// Función para enviar el formulario de tarea
 const submit = () => {
     const data = new FormData();
-    data.append('_method', form.id ? 'put' : 'post');
+    data.append('_method', form.id ? 'put' : 'post'); // Método HTTP: POST para crear, PUT para actualizar
 
+    // Se añade la portada al FormData si existe
     if (form.portada) {
         data.append('portada', form.portada);
     }
 
+    // Determinar la ruta adecuada según si es creación o actualización de tarea personal o de equipo
     const routeName = form.id ? 
         (props.tipo === 'personal' ? 'tareaPersonal.update' : 'tareaEquipo.update') :
         (props.tipo === 'personal' ? 'tareaPersonal.create' : 'tareaEquipo.create');
 
+    // Enviar los datos del formulario mediante POST o PUT
     form.post(route(routeName, form.id ? form.id : ''), {
         data,
         onSuccess: () => {
-            form.reset();
-            emit('formSubmitted');
+            form.reset(); // Reiniciar el formulario después del envío
+            emit('formSubmitted'); // Emitir evento formSubmitted
         },
         onError: () => {},
     });
 };
 
-const elimiarArchivo = (archivoId) => {
+// Función para eliminar un archivo asociado a la tarea
+const eliminarArchivo = (archivoId) => {
     form.archivosParaEliminar.push(archivoId);
     form.archivosExistentes = form.archivosExistentes.filter(archivo => archivo.id !== archivoId);
 };
 </script>
+
 
 <template>
     <form @submit.prevent="submit" enctype="multipart/form-data" class="w-70 p-4 h-[35rem] md:h-[45rem] overflow-auto bg-gray-800 text-white relative rounded-lg">
@@ -159,7 +170,7 @@ const elimiarArchivo = (archivoId) => {
                     <div v-for="archivo in form.archivosExistentes" :key="archivo.id" class="text-green-500 flex items-center gap-4">
                         <a :href="`/archivos/${archivo.nombre}`" target="_blank" class="inline-block w-96 overflow-hidden">{{ archivo.nombre }}</a>
                         
-                        <button type="button" @click="elimiarArchivo(archivo.id)" class="bg-red-500 text-white px-2 py-1 rounded-full">Eliminar</button>
+                        <button type="button" @click="eliminarArchivo(archivo.id)" class="bg-red-500 text-white px-2 py-1 rounded-full">Eliminar</button>
                     </div>
                 </div>
             </div>

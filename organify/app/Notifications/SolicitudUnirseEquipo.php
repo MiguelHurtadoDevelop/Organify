@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\Equipo;
 
 class SolicitudUnirseEquipo extends Notification
 {
@@ -13,14 +14,16 @@ class SolicitudUnirseEquipo extends Notification
 
     private $user;
     private $equipo_id;
+    private $notificacion_id;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($user, $equipo_id)
+    public function __construct($user, $equipo_id, $notificacion_id)
     {
         $this->user = $user;
         $this->equipo_id = $equipo_id;
+        $this->notificacion_id = $notificacion_id;
     }
     
 
@@ -39,9 +42,11 @@ class SolicitudUnirseEquipo extends Notification
      */
     public function toMail(object $notifiable): MailMessage
 {
+    $equipo = Equipo::find($this->equipo_id);
     return (new MailMessage)
-                ->line('The introduction to the notification.')
-                ->action('Aceptar Solicitud', route('equipo.aceptarSolicitud', ['user' => $this->user, 'equipo_id' => $this->equipo_id]))
+                ->subject('Solicitud de unión a equipo')
+                ->line('El usuario ' . $this->user->name .''. $this->user->apellidos . ' ha solicitado unirse a tu equipo ' . $equipo->nombre)
+                ->action('Aceptar Solicitud', route('equipo.aceptarSolicitud', ['user' => $this->user, 'equipo_id' => $this->equipo_id,'notificacion_id' => $this->notificacion_id]))
                 ->line('¡Gracias por usar nuestra aplicación!');
 }
 

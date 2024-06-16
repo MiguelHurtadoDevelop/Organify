@@ -1,12 +1,13 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { defineProps, ref, computed } from 'vue';
-import TareasForm from '@/Pages/Tareas/TareasForm.vue';
-import { router, Link } from '@inertiajs/vue3';
-import TareaLayout from '@/Pages/Tareas/TareaLayout.vue';
-import Equipo from '@/Pages/Equipo/Equipo.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; // Importación del layout de autenticación
+import { Head } from '@inertiajs/vue3'; // Importación del componente Head de Inertia
+import { defineProps, ref, computed } from 'vue'; // Importación de funciones de Vue
+import TareasForm from '@/Pages/Tareas/TareasForm.vue'; // Importación del componente TareasForm
+import { router, Link } from '@inertiajs/vue3'; // Importación del enrutador y Link de Inertia
+import TareaLayout from '@/Pages/Tareas/TareaLayout.vue'; // Importación del layout de tarea
+import Equipo from '@/Pages/Equipo/Equipo.vue'; // Importación del componente Equipo
 
+// Definición de props esperados por el componente
 const props = defineProps({
     tareasTablonEquipo: Array,
     equipo: Object,
@@ -15,26 +16,27 @@ const props = defineProps({
     authUser: Object,
 });
 
+// Variables reactivas para manejar el estado del formulario y detalles de tarea
+const tipo = 'equipo'; // Variable constante para tipo de entidad (en este caso, 'equipo')
+const showForm = ref(false); // Variable reactiva para mostrar/ocultar el formulario de tareas
+const tareaEditar = ref(null); // Referencia reactiva para la tarea que se está editando
+const showEquipo = ref(false); // Variable reactiva para mostrar/ocultar el detalle del equipo
 
-
-const tipo = 'equipo';
-const showForm = ref(false);
-const tareaEditar = ref(null);
-const showEquipo = ref(false);
-
-
+// Función para alternar la visualización del formulario de tareas
 const toggleForm = () => {
   showForm.value = !showForm.value;
   if (!showForm.value) {
-    tareaEditar.value = null;  // Reset tareaEditar when form is closed
+    tareaEditar.value = null;  // Reiniciar tareaEditar cuando se cierra el formulario
   }
 }
 
+// Función ejecutada cuando se envía el formulario de tareas
 const handleFormSubmitted = () => {
   showForm.value = false;
-  tareaEditar.value = null;  // Reset tareaEditar after form submission
+  tareaEditar.value = null;  // Reiniciar tareaEditar después de enviar el formulario
 }
 
+// Función para cerrar el div al hacer clic fuera de él
 const closeDivOnClickOutside = (event) => {
   if (event.target.classList.contains('div-overlay')) {
     showForm.value = false;
@@ -42,11 +44,12 @@ const closeDivOnClickOutside = (event) => {
   }
 }
 
-// New variables for sorting and filtering
-const sortOrder = ref('highToLow'); // 'highToLow', 'lowToHigh', 'newestFirst', 'oldestFirst'
-const selectedStatus = ref('todas'); // 'todas', 'to-do', 'doing', 'done', 'asignadas', 'sin asignar'
+// Variable reactiva para el orden de clasificación de las tareas
+const sortOrder = ref('highToLow'); // Orden inicial: de alta a baja prioridad
+// Variable reactiva para el estado seleccionado de las tareas
+const selectedStatus = ref('todas'); // Estado inicial: todas las tareas
 
-// Helper function to get numeric value for priority
+// Función para obtener el valor numérico de prioridad
 const getPriorityValue = (priority) => {
   switch (priority) {
     case 'alta':
@@ -60,10 +63,11 @@ const getPriorityValue = (priority) => {
   }
 }
 
-// Computed property to sort and filter tasks
+// Computación de tareas filtradas y ordenadas según los filtros seleccionados
 const sortedAndFilteredTareas = computed(() => {
   let filteredTareas = props.tareasTablonEquipo;
   
+  // Aplicar filtro por estado seleccionado
   if (selectedStatus.value !== 'todas') {
     if (selectedStatus.value === 'asignadas') {
       filteredTareas = filteredTareas.filter(tarea => tarea.asignada);
@@ -74,42 +78,45 @@ const sortedAndFilteredTareas = computed(() => {
     }
   }
 
+  // Ordenar las tareas según el orden seleccionado
   return filteredTareas.sort((a, b) => {
     const aPriority = getPriorityValue(a.prioridad);
     const bPriority = getPriorityValue(b.prioridad);
 
     if (sortOrder.value === 'highToLow') {
-      return bPriority - aPriority;
+      return bPriority - aPriority; // Orden de alta a baja prioridad
     } else if (sortOrder.value === 'lowToHigh') {
-      return aPriority - bPriority;
+      return aPriority - bPriority; // Orden de baja a alta prioridad
     } else if (sortOrder.value === 'newestFirst') {
-      return new Date(b.created_at) - new Date(a.created_at);
+      return new Date(b.created_at) - new Date(a.created_at); // Orden por fecha más reciente primero
     } else if (sortOrder.value === 'oldestFirst') {
-      return new Date(a.created_at) - new Date(b.created_at);
+      return new Date(a.created_at) - new Date(b.created_at); // Orden por fecha más antigua primero
     }
   });
 });
 
-// Function to update sort order
+// Función para actualizar el orden de clasificación
 const updateSortOrder = (event) => {
   sortOrder.value = event.target.value;
 }
 
-// Function to update selected status
+// Función para actualizar el estado seleccionado de las tareas
 const updateSelectedStatus = (event) => {
   selectedStatus.value = event.target.value;
 }
 
+// Función para alternar la visualización del detalle del equipo
 const toggleEquipo = () => {
   showEquipo.value = !showEquipo.value;
 }
 </script>
 
+
 <template>
   <Head title="Tablón de Equipo" />
 
   <AuthenticatedLayout>
-    <div class="mb-5">
+    <div class="mb-5 pb-5">
       <div class="flex gap-3 flex-col lg:flex-row items-start justify-between lg:items-center border-b-2 mb-6">
         <div @click="toggleEquipo" preserve-scroll class="cursor-pointer">
           <div class="flex items-center gap-3 ">

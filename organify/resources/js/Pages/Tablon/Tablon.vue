@@ -1,44 +1,50 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { defineProps, ref, computed } from 'vue';
-import TareasForm from '@/Pages/Tareas/TareasForm.vue';
-import { router } from '@inertiajs/vue3';
-import TareaLayout from '../Tareas/TareaLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; // Importación del layout de autenticación
+import { Head } from '@inertiajs/vue3'; // Importación del componente Head de Inertia
+import { defineProps, ref, computed } from 'vue'; // Importación de funciones de Vue
+import TareasForm from '@/Pages/Tareas/TareasForm.vue'; // Importación del componente TareasForm
+import { router } from '@inertiajs/vue3'; // Importación del enrutador de Inertia
+import TareaLayout from '../Tareas/TareaLayout.vue'; // Importación del layout de tarea desde la ruta relativa
 
+// Definición de props esperados por el componente
 const props = defineProps({
   tareasTablon: Array
 });
 
+// Variable constante para tipo de entidad (en este caso, 'personal')
 const tipo = 'personal';
 
-const showForm = ref(false);
-const tareaEditar = ref(null);
+// Variables reactivas para manejar el estado del formulario y detalles de tarea
+const showForm = ref(false); // Variable reactiva para mostrar/ocultar el formulario de tareas
+const tareaEditar = ref(null); // Referencia reactiva para la tarea que se está editando
 
-
+// Función para alternar la visualización del formulario de tareas
 const toggleForm = () => {
   showForm.value = !showForm.value;
   if (!showForm.value) {
-    tareaEditar.value = null;  // Reset tareaEditar when form is closed
+    tareaEditar.value = null;  // Reiniciar tareaEditar cuando se cierra el formulario
   }
 }
 
+// Función ejecutada cuando se envía el formulario de tareas
 const handleFormSubmitted = () => {
   showForm.value = false;
-  tareaEditar.value = null;  // Reset tareaEditar after form submission
+  tareaEditar.value = null;  // Reiniciar tareaEditar después de enviar el formulario
 }
 
+// Función para cerrar el div al hacer clic fuera de él
 const closeDivOnClickOutside = (event) => {
   if (event.target.classList.contains('div-overlay')) {
     showForm.value = false;
   }
 }
 
-// New variables for sorting and filtering
-const sortOrder = ref('highToLow'); // 'highToLow', 'lowToHigh', 'newestFirst', 'oldestFirst'
-const selectedStatus = ref('todas'); // 'todas', 'to-do', 'doing', 'done'
+// Variable reactiva para el orden de clasificación de las tareas
+const sortOrder = ref('highToLow'); // Orden inicial: de alta a baja prioridad
+// Variable reactiva para el estado seleccionado de las tareas
+const selectedStatus = ref('todas'); // Estado inicial: todas las tareas
 
-// Helper function to get numeric value for priority
+// Función para obtener el valor numérico de prioridad
 const getPriorityValue = (priority) => {
   switch (priority) {
     case 'alta':
@@ -52,36 +58,38 @@ const getPriorityValue = (priority) => {
   }
 }
 
-// Computed property to sort and filter tasks
+// Computación de tareas filtradas y ordenadas según los filtros seleccionados
 const sortedAndFilteredTareas = computed(() => {
   let filteredTareas = props.tareasTablon;
   
+  // Aplicar filtro por estado seleccionado
   if (selectedStatus.value !== 'todas') {
     filteredTareas = filteredTareas.filter(tarea => tarea.estado === selectedStatus.value);
   }
 
+  // Ordenar las tareas según el orden seleccionado
   return filteredTareas.sort((a, b) => {
     const aPriority = getPriorityValue(a.prioridad);
     const bPriority = getPriorityValue(b.prioridad);
 
     if (sortOrder.value === 'highToLow') {
-      return bPriority - aPriority;
+      return bPriority - aPriority; // Orden de alta a baja prioridad
     } else if (sortOrder.value === 'lowToHigh') {
-      return aPriority - bPriority;
+      return aPriority - bPriority; // Orden de baja a alta prioridad
     } else if (sortOrder.value === 'newestFirst') {
-      return new Date(b.created_at) - new Date(a.created_at);
+      return new Date(b.created_at) - new Date(a.created_at); // Orden por fecha más reciente primero
     } else if (sortOrder.value === 'oldestFirst') {
-      return new Date(a.created_at) - new Date(b.created_at);
+      return new Date(a.created_at) - new Date(b.created_at); // Orden por fecha más antigua primero
     }
   });
 });
 
-// Function to update sort order
+// Función para actualizar el orden de clasificación
 const updateSortOrder = (event) => {
   sortOrder.value = event.target.value;
 }
 
-// Function to update selected status
+// Función para actualizar el estado seleccionado de las tareas
 const updateSelectedStatus = (event) => {
   selectedStatus.value = event.target.value;
 }
@@ -89,7 +97,7 @@ const updateSelectedStatus = (event) => {
 
 <template>
   <AuthenticatedLayout>
-    <div class="mb-5">
+    <div class="mb-5 pb-5">
       <!-- Sort and Filter controls -->
       <h1 class="text-3xl font-mono font-semibold flex justify-center text-gray-800 mb-4">Tablón Personal</h1>
       <div class="flex gap-5 flex-col justify-center mb-6 lg:flex-row items-start  items-center">

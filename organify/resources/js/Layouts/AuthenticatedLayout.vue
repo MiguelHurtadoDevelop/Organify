@@ -1,4 +1,5 @@
 <script setup>
+// Importaciones de Vue y componentes
 import { ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
@@ -10,33 +11,42 @@ import CreacionEquipoForm from '@/Pages/Equipo/CreacionEquipoForm.vue';
 import { Link, router } from '@inertiajs/vue3';
 import TareasForm from '@/Pages/Tareas/TareasForm.vue';
 
+// Uso de hook usePage para obtener props de Inertia
 const { props } = usePage();
 
+// Definición de una constante tipo
 const tipo = 'personal';
 
+// Refs para controlar el estado de varios componentes
 const showFormTarea = ref(false);
-
 const showingNavigationDropdown = ref(false);
 const showFormEquipo = ref(false);
 const showNotifications = ref(false);
+
+// Referencia a las notificaciones del usuario obtenidas de props
 const notificaciones = ref(props.NotificacionesUsuario);
 
+// Función para alternar la visibilidad del formulario de equipo
 const toggleForm = () => {
   showFormEquipo.value = !showFormEquipo.value;
 }
 
+// Función para manejar la acción de enviar el formulario de equipo
 const handleFormSubmitted = () => {
   showFormEquipo.value = false;
 }
 
+// Función para alternar la visibilidad del formulario de tarea
 const toggleFormTarea = () => {
   showFormTarea.value = !showFormTarea.value;
 }
 
+// Función para manejar la acción de enviar el formulario de tarea
 const handleFormSubmittedTarea = () => {
   showFormTarea.value = false;
 }
 
+// Función para cerrar los overlays al hacer clic fuera de ellos
 const closeDivOnClickOutside = (event) => {
   if (event.target.classList.contains('div-overlay')) {
     showFormEquipo.value = false;
@@ -45,54 +55,55 @@ const closeDivOnClickOutside = (event) => {
   }
 }
 
+// Función para alternar el menú móvil de navegación
 const toggleMobileMenu = () => {
   showingNavigationDropdown.value = !showingNavigationDropdown.value;
 }
 
+// Función para cerrar el menú móvil de navegación
 const closeMobileMenu = () => {
   showingNavigationDropdown.value = false;
 }
 
+// Función para aceptar solicitud de usuario en un equipo
 const aceptarUsuario = (usuarioId, equipoId, notificacionId) => {
- console.log('aceptando usuario' + notificacionId)
-  eliminarNotificacion(notificacionId);
-  router.get(route('equipo.aceptarSolicitud', { equipo_id: equipoId, user: usuarioId }), {
+  notificaciones.value = notificaciones.value.filter(notificacion => notificacion.id !== notificacionId);
+  router.get(route('equipo.aceptarSolicitud', { equipo_id: equipoId, user: usuarioId, notificacion_id: notificacionId }), {
     onSuccess: () => {
-      console.log('Usuario aceptado')
     }
   });
 }
 
+// Función para rechazar solicitud de usuario en un equipo
 const rechazarUsuario = (usuarioId, equipoId , notificacionId) => {
-  console.log('rechazando usuario' + notificacionId)
-  eliminarNotificacion(notificacionId);
-  router.get(route('equipo.rechazarSolicitud', { equipo_id: equipoId, user: usuarioId }), {
+  notificaciones.value = notificaciones.value.filter(notificacion => notificacion.id !== notificacionId);
+  router.get(route('equipo.rechazarSolicitud', { equipo_id: equipoId, user: usuarioId, notificacion_id: notificacionId }), {
     onSuccess: () => {
-      console.log('Usuario rechazado')
     }
   });
 }
 
+// Función para aceptar una tarea
 const aceptarTarea = (tareaId , notificacionId) => {
-  console.log('aceptando tarea'.notificacionId)
-  eliminarNotificacion(notificacionId);
-  router.get(route('tarea.aceptar', tareaId), {
+  notificaciones.value = notificaciones.value.filter(notificacion => notificacion.id !== notificacionId);
+
+  router.get(route('tarea.aceptar', {tarea: tareaId , notificacion_id: notificacionId}), {
     onSuccess: () => {
-      
     }
   });
 }
 
+// Función para rechazar una tarea
 const rechazarTarea = (tareaId, notificacionId ) => {
-  console.log('rechazando tarea'.notificacionId)
-  eliminarNotificacion(notificacionId);
-  router.get(route('tarea.rechazar', tareaId), {
+  notificaciones.value = notificaciones.value.filter(notificacion => notificacion.id !== notificacionId);
+
+  router.get(route('tarea.rechazar', {tarea: tareaId , notificacion_id: notificacionId}), {
     onSuccess: () => {
-      
     }
   });
 }
 
+// Función para decodificar datos JSON
 const decodeData = (data) => {
   try {
     return JSON.parse(data);
@@ -102,17 +113,19 @@ const decodeData = (data) => {
   }
 }
 
+// Función para eliminar una notificación
 const eliminarNotificacion = (notificacionId) => {
-  console.log('eliminando notificacion' + notificacionId)
   notificaciones.value = notificaciones.value.filter(notificacion => notificacion.id !== notificacionId);
   router.post(route('notificacion.eliminar'), {
     id: notificacionId,
+    onBefore: () => {
+    },
     onSuccess: () => {
-      console.log('Notificacion eliminada')
     }
   });
 }
 </script>
+
 
 <template>
   
@@ -350,7 +363,7 @@ const eliminarNotificacion = (notificacionId) => {
                         </div>
                     </div>
                 </div>
-                <div v-else-if="notificacion.tipo === 'aceptado' || notificacion.tipo === 'unido' || notificacion.tipo === 'salido' || notificacion.tipo === 'abandono' || notificacion.tipo === 'rechazado'">
+                <div v-else-if="notificacion.tipo === 'aceptado' || notificacion.tipo === 'unido' || notificacion.tipo === 'salido' || notificacion.tipo === 'abandono' || notificacion.tipo === 'rechazado' || notificacion.tipo === 'expulsion'">
                     <h3 class="text-xl font-semibold mb-2">{{ notificacion.titulo }}</h3>
                     <p v-html="notificacion.descripcion"></p>
                 </div>

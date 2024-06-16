@@ -247,7 +247,7 @@ onMounted(() => {
         </a>
     </div>
     
-    <footer class="py-16 bg-gray-800 text-center text-md text-black dark:text-white/70">
+    <footer class="py-16 bg-gray-800 text-center text-md text-white">
         <div class=" flex flex-col lg:flex-row gap-5 justify-around items-center ">
             <p>&copy; 2024 Organify. Todos los derechos reservados.</p>
             <div class="flex flex-row justify-around gap-3 items-center">

@@ -43,9 +43,9 @@ Route::get('equipo/{equipo}/tablon', [TareaController::class, 'tareasTablonEquip
 
 Route::post('equipo/solicitarUnirse', [EquipoController::class, 'solicitarUnirse'])->middleware((['auth', 'verified']))->name('equipo.solicitarUnirse');
 
-Route::get('equipo/aceptarSolicitud/{user}/{equipo_id}', [EquipoController::class, 'aceptarSolicitud'])->middleware((['auth', 'verified']))->name('equipo.aceptarSolicitud');
+Route::get('equipo/aceptarSolicitud/{user}/{equipo_id}/{notificacion_id}', [EquipoController::class, 'aceptarSolicitud'])->middleware((['auth', 'verified']))->name('equipo.aceptarSolicitud');
 
-Route::get('equipo/rechazarSolicitud/{user}/{equipo_id}', [EquipoController::class, 'rechazarSolicitud'])->middleware((['auth', 'verified']))->name('equipo.rechazarSolicitud');
+Route::get('equipo/rechazarSolicitud/{user}/{equipo_id}/{notificacion_id}', [EquipoController::class, 'rechazarSolicitud'])->middleware((['auth', 'verified']))->name('equipo.rechazarSolicitud');
 
 Route::post('equipo/join', [EquipoController::class, 'joinEquipo'])->middleware((['auth', 'verified']))->name('equipo.join');
 
@@ -61,9 +61,9 @@ Route::get('/calendario', [TareaController::class, 'tareasCalendario'])->middlew
 
 Route::get('/tablon',[TareaController::class, 'tareasTablon'])->middleware((['auth', 'verified']))->name('tablon');
 
-Route::get('/tarea/aceptar/{tarea}', [TareaController::class, 'aceptarTarea'])->middleware((['auth', 'verified']))->name('tarea.aceptar');
+Route::get('/tarea/aceptar/{tarea}/{notificacion_id}', [TareaController::class, 'aceptarTarea'])->middleware((['auth', 'verified']))->name('tarea.aceptar');
 
-Route::get('/tarea/rechazar/{tarea}', [TareaController::class, 'rechazarTarea'])->middleware((['auth', 'verified']))->name('tarea.rechazar');
+Route::get('/tarea/rechazar/{tarea}/{notificacion_id}', [TareaController::class, 'rechazarTarea'])->middleware((['auth', 'verified']))->name('tarea.rechazar');
 
 Route::post('/tarea/estado/{id}', [TareaController::class, 'cambiarEstado'])->middleware(['auth', 'verified'])->name('tarea.estado');
 

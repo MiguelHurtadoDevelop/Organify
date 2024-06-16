@@ -110,7 +110,7 @@ class EquipoController extends Controller
 
         // Si el usuario ya es miembro, redirigir con un mensaje de error
         if ($miembrosEquipo->count() > 0) {
-            return redirect()->route('equipoById', $request->equipo_id)->withErrors(['message' => 'Ya eres miembro de este equipo.']);
+            return redirect()->route('equipos', $request->equipo_id)->withErrors(['message' => 'Ya eres miembro de este equipo.']);
         } else {
             // Crear una nueva solicitud de unión al equipo para el usuario
             $miembro = new MiembroDeEquipo;
@@ -126,19 +126,20 @@ class EquipoController extends Controller
                                     ->where('rol', 'manager')
                                     ->get();
 
-        foreach ($managers as $manager) {
-            $manager->user->notify(new \App\Notifications\SolicitudUnirseEquipo(Auth::user(), $request->equipo_id));
-            NotificacionController::createNotificacion(new Request([
+
+        foreach ($managers as $manager) {            
+            $notificacion = NotificacionController::createNotificacion(new Request([
                 'titulo' => 'Solicitud de unión a equipo',
                 'descripcion' => '<strong>' . Auth::user()->nombre . ' ' . Auth::user()->apellido . '</strong> ha solicitado unirse a tu equipo.',
                 'tipo' => 'solicitud',
                 'user_id' => $manager->user->id,
                 'data' => json_encode(['user' => Auth::user(), 'equipo_id' => $request->equipo_id, 'equipo_nombre' => $manager->equipo->nombre])
             ]));
+
+
+            $manager->user->notify(new \App\Notifications\SolicitudUnirseEquipo(Auth::user(), $request->equipo_id, $notificacion->id));
         }
 
-        // Redirigir al detalle del equipo después de procesar la solicitud
-        return $this->equipoById($request->equipo_id);
     }
 
     /**
@@ -148,8 +149,12 @@ class EquipoController extends Controller
      * @param  int  $equipo_id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function aceptarSolicitud($user_id, $equipo_id)
+    public function aceptarSolicitud($user_id, $equipo_id, $notificacion_id)
     {
+        NotificacionController::deleteNotificacion(new Request([
+            'id' => $notificacion_id
+        ]));
+
         // Buscar el miembro del equipo con el usuario y equipo específicos
         $miembro = MiembroDeEquipo::where('user_id', $user_id)
                                     ->where('equipo_id', $equipo_id)
@@ -178,8 +183,8 @@ class EquipoController extends Controller
             'user_id' => $user_id
         ]));
 
-        // Redirigir al tablón del equipo después de aceptar la solicitud
         return redirect()->route('equipo.tablon', $equipo_id);
+        
     }
 
     /**
@@ -189,8 +194,11 @@ class EquipoController extends Controller
      * @param  int  $equipo_id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function rechazarSolicitud($user_id, $equipo_id)
+    public function rechazarSolicitud($user_id, $equipo_id, $notificacion_id)
     {
+        NotificacionController::deleteNotificacion(new Request([
+            'id' => $notificacion_id
+        ]));
         // Buscar el miembro del equipo con el usuario y equipo específicos
         $miembro = MiembroDeEquipo::where('user_id', $user_id)
                                     ->where('equipo_id', $equipo_id)
@@ -198,12 +206,10 @@ class EquipoController extends Controller
         
         // Si no se encuentra el miembro, redirigir con un mensaje de error
         if (!$miembro) {
-            \Log::info('No se ha encontrado la solicitud');
             return redirect()->route('equipo.tablon', $equipo_id)->withErrors(['message' => 'No se ha encontrado la solicitud.']);
         } else {
             // Eliminar el miembro del equipo y registrar la acción
             $miembro->delete();
-            \Log::info('Solicitud rechazada');
         }
 
         // Notificar al usuario que su solicitud ha sido rechazada
@@ -217,8 +223,8 @@ class EquipoController extends Controller
             'user_id' => $user_id
         ]));
 
-        // Redirigir al tablón del equipo después de procesar la solicitud
         return redirect()->route('equipo.tablon', $equipo_id);
+        
     }
 
     /**
@@ -268,46 +274,6 @@ class EquipoController extends Controller
 
         // Redirigir al tablón del equipo después de que el usuario se haya unido
         return redirect()->route('equipo.tablon', $request->equipo_id);
-    }
-
-    /**
-     * Muestra la página de detalles de un equipo específico.
-     *
-     * @param  int  $equipo_id
-     * @return \Inertia\Response
-     */
-    public function equipoById($equipo_id)
-    {
-        // Buscar el equipo por su ID
-        $equipo = Equipo::find($equipo_id);
-
-        // Obtener todos los miembros del equipo
-        $miembros = MiembroDeEquipo::where('equipo_id', $equipo->id)->get();
-
-        // Verificar si el usuario actual es miembro del equipo y obtener su rol
-        $usuarioMiembro = MiembroDeEquipo::where('equipo_id', $equipo->id)
-                                ->where('user_id', Auth::user()->id)
-                                ->first();
-
-        // Determinar el rol del usuario actual en el equipo
-        $rol = $usuarioMiembro ? $usuarioMiembro->rol : null;
-
-        $usersMiembros = [];
-
-        // Obtener información detallada de cada miembro del equipo
-        foreach ($miembros as $miembro) {
-            $usersMiembros[] = [
-                'miembro' => $miembro,
-                'user' => $miembro->user, 
-            ];
-        }
-
-        // Renderizar la vista de detalles del equipo utilizando Inertia
-        return Inertia::render('Equipo/Equipo', [
-            'equipo' => $equipo,
-            'miembros' => $usersMiembros,
-            'rol' => $rol
-        ]);
     }
 
     /**
@@ -405,7 +371,7 @@ class EquipoController extends Controller
         $equipo->save();
 
         // Redirigir a la página de detalles del equipo actualizado
-        return $this->equipoById($equipo_id);
+        
     }
 
     /**
@@ -429,7 +395,7 @@ class EquipoController extends Controller
 
         // Si el usuario no es manager, mostrar un mensaje de error
         if (!$manager) {
-            return redirect()->route('equipoById', $equipo_id)->withErrors(['message' => 'No tienes permiso para expulsar miembros.']);
+            return redirect()->route('equipo.tablon', $equipo_id)->withErrors(['message' => 'No tienes permiso para expulsar a este miembro.']);
         }
 
         // Crear una notificación informando al miembro expulsado sobre la acción
@@ -444,7 +410,7 @@ class EquipoController extends Controller
         $miembro->delete();
 
         // Redirigir a la página de detalles del equipo después de la expulsión
-        return $this->equipoById($equipo_id);
+       
     }
 
     /**

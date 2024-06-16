@@ -1,13 +1,14 @@
 <script setup>
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/Components/InputError.vue'; // Importación de componentes de Vue
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { router, useForm } from '@inertiajs/vue3';
-import { defineProps, defineEmits, ref, watch } from 'vue';
-import heic2any from 'heic2any';
+import { router, useForm } from '@inertiajs/vue3'; // Importación de funciones de Vue y de Inertia
+import { defineProps, defineEmits, ref, watch } from 'vue'; // Importación de funciones de Vue
 
+import heic2any from 'heic2any'; // Importación de la librería para convertir HEIC a PNG
 
+// Definición de props esperados por el componente
 const props = defineProps({
     equipo: {
         type: Object,
@@ -22,8 +23,10 @@ const props = defineProps({
     }
 });
 
+// Definición de eventos emitidos por el componente
 const emit = defineEmits(['formSubmitted', 'closeForm']);
 
+// Uso del hook useForm para manejar el formulario
 const form = useForm({
     id: props.equipo.id,
     foto: null,
@@ -34,43 +37,41 @@ const form = useForm({
     currentImage: null,
 });
 
+// Función para manejar el cambio de archivo de imagen
 const handleFileChange = async (event) => {
-    console.log("File change event: ", event.target.files);
-    const file = event.target.files[0];
+    const file = event.target.files[0]; // Obtención del archivo seleccionado
     if (file) {
-        console.log("File type: ", file.type);
-        if (file.name.split('.').pop().toLowerCase() === 'heic'){
-            console.log("Converting HEIC to PNG...");
+        if (file.name.split('.').pop().toLowerCase() === 'heic' || file.name.split('.').pop().toLowerCase() === 'hevc' ){
             try {
-                const convertedBlob = await heic2any({
+                const convertedBlob = await heic2any({ // Conversión del archivo HEIC a PNG
                     blob: file,
                     toType: "image/png",
                 });
                 const convertedFile = new File([convertedBlob], file.name.split('.')[0] + '.png', { type: "image/png" });
-                form.foto = convertedFile;
-                form.currentImage = URL.createObjectURL(convertedFile);
+                form.foto = convertedFile; // Asignación del archivo convertido al formulario
+                form.currentImage = URL.createObjectURL(convertedFile); // Creación de URL para mostrar la imagen convertida
             } catch (error) {
-                console.error("Error converting HEIC to PNG: ", error);
+                console.error("Error converting HEIC to PNG: ", error); // Manejo de errores en la conversión
             }
         } else {
-            form.foto = file;
-            form.currentImage = URL.createObjectURL(file);
+            form.foto = file; // Asignación del archivo al formulario
+            form.currentImage = URL.createObjectURL(file); // Creación de URL para mostrar la imagen seleccionada
         }
     }
 };
 
-
-
+// Función para enviar el formulario
 const submit = () => {
-    const routeName = form.id ? 'equipo.update' : 'equipo.create';
-    form.post(route(routeName, form.id), {
+    const routeName = form.id ? 'equipo.update' : 'equipo.create'; // Determinación de la ruta según sea creación o actualización
+    form.post(route(routeName, form.id), { // Envío del formulario utilizando Inertia
         onSuccess: () => {
-            form.reset();
-            emit('formSubmitted');
+            form.reset(); // Reinicio del formulario después de enviar
+            emit('formSubmitted'); // Emisión del evento de formulario enviado
         }
     });
 };
 </script>
+
 
 <template>
     <form @submit.prevent="submit" enctype="multipart/form-data" class="w-70 p-4 h-[35rem] md:h-[45rem] bg-gray-800 text-white rounded-lg shadow-md overflow-auto relative">

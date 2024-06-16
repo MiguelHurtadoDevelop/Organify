@@ -44,7 +44,7 @@ class SolicitudAceptada extends Notification
                     ->subject('Solicitud aceptada')
                     ->line('Has sido aceptado en el equipo ' . $equipo->nombre)
                     ->action('Tablón del equipo', route('equipo.tablon', ['equipo' => $this->equipo_id]))
-                    ->line('¡Gracias por usar nuestra aplicación!');
+                    ->line('¡Visita el tablón para empezar a colaborar!');
     }
 
     /**

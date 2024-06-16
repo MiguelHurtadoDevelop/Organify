@@ -28,12 +28,9 @@ const form = useForm({
 
 
 const handleFileChange = async (event) => {
-    console.log("File change event: ", event.target.files);
     const file = event.target.files[0];
     if (file) {
-        console.log("File type: ", file.type);
-        if (file.name.split('.').pop().toLowerCase() === 'heic'){
-            console.log("Converting HEIC to PNG...");
+        if (file.name.split('.').pop().toLowerCase() === 'heic' || file.name.split('.').pop().toLowerCase() === 'hevc' ){
             try {
                 const convertedBlob = await heic2any({
                     blob: file,

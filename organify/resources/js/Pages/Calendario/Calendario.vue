@@ -1,23 +1,23 @@
 <script>
 
-import FullCalendar from '@fullcalendar/vue3';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import { ref, onMounted, watch } from 'vue';
-import TareasForm from '@/Pages/Tareas/TareasForm.vue';
-import { router } from '@inertiajs/vue3';
-import { format, isSameDay } from 'date-fns';
-import { es } from 'date-fns/locale';
+import FullCalendar from '@fullcalendar/vue3'; // Importación del componente FullCalendar para Vue 3
+import dayGridPlugin from '@fullcalendar/daygrid'; // Plugin de FullCalendar para la vista de día
+import interactionPlugin from '@fullcalendar/interaction'; // Plugin de FullCalendar para interacción con eventos
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; // Layout para usuarios autenticados
+import timeGridPlugin from '@fullcalendar/timegrid'; // Plugin de FullCalendar para la vista de tiempo
+import { ref, onMounted, watch } from 'vue'; // Importaciones de Vue para refs, montaje y watch
+import TareasForm from '@/Pages/Tareas/TareasForm.vue'; // Componente de formulario de tareas
+import { router } from '@inertiajs/vue3'; // Enrutador de Inertia.js para Vue 3
+import { format, isSameDay } from 'date-fns'; // Funciones de date-fns para formateo y comparación de fechas
+import { es } from 'date-fns/locale'; // Localización en español de date-fns
 
 export default {
   props: {
-    tareasCalendario: {
+    tareasCalendario: { // Propiedad: array de tareas para mostrar en el calendario
       type: Array,
       required: true
     },
-    tareaEditar: {
+    tareaEditar: { // Propiedad: tarea actualmente en modo de edición
       type: Object,
       default: null
     }
@@ -27,59 +27,66 @@ export default {
     AuthenticatedLayout,
     TareasForm
   },
-  setup(props) {
-    const showForm = ref(false);
-    const showDetails = ref(false);
-    const calendarEvents = ref([]);
-    const fecha_ini = ref('');
-    const fecha_fin = ref('');
-    const tareaDetalles = ref(null);
-    const tareaEditar = ref(null);
-    const tipo = 'personal';
-    const tareaEliminar = ref(null);
-    const showConfirmModal = ref(false);
-    
+  setup(props) { // Configuración de Vue 3 con setup()
 
+    // Refs para estado local
+    const showForm = ref(false); // Mostrar/ocultar formulario de tarea
+    const showDetails = ref(false); // Mostrar/ocultar detalles de tarea
+    const calendarEvents = ref([]); // Eventos del calendario
+    const fecha_ini = ref(''); // Fecha de inicio seleccionada
+    const fecha_fin = ref(''); // Fecha de fin seleccionada
+    const tareaDetalles = ref(null); // Detalles de la tarea seleccionada
+    const tareaEditar = ref(null); // Tarea en modo de edición
+    const tipo = 'personal'; // Tipo de tarea (en este caso, 'personal')
+    const tareaEliminar = ref(null); // Tarea a eliminar
+    const showConfirmModal = ref(false); // Mostrar modal de confirmación de eliminación
+
+    // Función para alternar la visibilidad del formulario de tarea
     const toggleForm = () => {
       showForm.value = !showForm.value;
       if (!showForm.value) {
-        tareaEditar.value = null;
+        tareaEditar.value = null; // Reiniciar la tarea en modo de edición si se oculta el formulario
       }
     }
 
+    // Manejador llamado cuando se envía el formulario de tarea
     const handleFormSubmitted = () => {
-      showForm.value = false;
-      tareaEditar.value = null;
+      showForm.value = false; // Ocultar el formulario
+      tareaEditar.value = null; // Reiniciar la tarea en modo de edición
     }
 
+    // Función para cerrar el formulario al hacer clic fuera de él
     const closeFormOnClickOutside = (event) => {
       if (event.target.classList.contains('form-overlay')) {
         showForm.value = false;
       }
     }
 
+    // Manejador para mover un evento en el calendario
     const handleEventDrop = (eventDropInfo) => {
       const tarea = props.tareasCalendario.find(tarea => tarea.id == eventDropInfo.event.id);
 
       if (tarea) {
-       
+        // Enviar solicitud para cambiar fecha de la tarea al servidor
         router.post(route('tarea.cambiarFecha', tarea.id), {
-          
           fecha_ini: toLocalISOString(new Date(eventDropInfo.event.start)),
           fecha_fin: toLocalISOString(new Date(eventDropInfo.event.end)),
         });
       }
     }
-    
+
+    // Función para convertir fecha a formato ISO local
     function toLocalISOString(date) {
-        const tzoffset = date.getTimezoneOffset() * 60000;
-        const localISOTime = new Date(date - tzoffset).toISOString().slice(0, 16);
-        return localISOTime;
+      const tzoffset = date.getTimezoneOffset() * 60000;
+      const localISOTime = new Date(date - tzoffset).toISOString().slice(0, 16);
+      return localISOTime;
     }
 
+    // Manejador para redimensionar un evento en el calendario
     const handleEventResize = (eventResizeInfo) => {
       const tarea = props.tareasCalendario.find(tarea => tarea.id == eventResizeInfo.event.id);
       if (tarea) {
+        // Enviar solicitud para cambiar fecha de la tarea al servidor
         router.post(route('tarea.cambiarFecha', tarea.id), {
           fecha_ini: toLocalISOString(new Date(eventResizeInfo.event.start)),
           fecha_fin: toLocalISOString(new Date(eventResizeInfo.event.end)),
@@ -87,6 +94,7 @@ export default {
       }
     }
 
+    // Función para cerrar detalles al hacer clic fuera de ellos
     const closeDivOnClickOutside = (event) => {
       if (event.target.classList.contains('div-overlay')) {
         showForm.value = false;
@@ -94,14 +102,14 @@ export default {
       }
     }
 
-    
-
+    // Manejador para seleccionar una fecha en el calendario
     const handleDateSelect = (selectionInfo) => {
       fecha_ini.value = selectionInfo.start;
       fecha_fin.value = selectionInfo.end;
-      toggleForm();
+      toggleForm(); // Mostrar formulario para esa selección
     }
 
+    // Función para cargar eventos al inicio o al cambiar props
     const loadEvents = () => {
       if (props.tareasCalendario && Array.isArray(props.tareasCalendario)) {
         calendarEvents.value = props.tareasCalendario.map(tarea => ({
@@ -114,13 +122,16 @@ export default {
       }
     }
 
-    watch(() => props.tareasCalendario, loadEvents, { immediate: true });
-
+    // Cargar eventos al montar el componente
     onMounted(() => {
       loadEvents();
     });
 
+    // Observar cambios en las tareas y actualizar eventos del calendario
+    watch(() => props.tareasCalendario, loadEvents, { immediate: true });
+
     return {
+      // Variables y funciones disponibles en el contexto del template
       showForm,
       showDetails,
       tareaEditar,
@@ -146,43 +157,41 @@ export default {
         editable: true,
         eventDrop: handleEventDrop,
         eventResize: handleEventResize,
-        
         selectable: true,
         select: handleDateSelect,
-        events: calendarEvents.value,
-        eventClick: function(info) {
+        events: calendarEvents.value, // Eventos actuales del calendario
+        eventClick: function(info) { // Manejador para clic en evento del calendario
           const tarea = props.tareasCalendario.find(tarea => tarea.id == info.event.id);
           if (tarea) {
-            tareaDetalles.value = tarea;
+            tareaDetalles.value = tarea; // Mostrar detalles de la tarea clickeada
             showDetails.value = true;
           }
         },
-        slotLabelFormat: {
+        slotLabelFormat: { // Formato de etiqueta de hora en las celdas
           hour: 'numeric',
           minute: '2-digit',
           omitZeroMinute: false,
           meridiem: 'long',
           hour12: false
         },
-        eventTimeFormat: {
+        eventTimeFormat: { // Formato de hora en los eventos del calendario
           hour: 'numeric',
           minute: '2-digit',
           omitZeroMinute: false,
           meridiem: 'long',
           hour12: false
         },
-        dayCellDidMount: function(info) {
+        dayCellDidMount: function(info) { // Función al montar celda de día en el calendario
           const today = new Date();
           const cellDate = new Date(info.date);
           
-          // Compare year, month, and day
+          // Comparar año, mes y día para resaltar el día actual
           if (
             cellDate.getFullYear() === today.getFullYear() &&
             cellDate.getMonth() === today.getMonth() &&
             cellDate.getDate() === today.getDate()
           ) {
-
-            info.el.style.backgroundColor = '#e6ffe6'; // Verde clarito
+            info.el.style.backgroundColor = '#e6ffe6'; // Estilo para resaltar el día actual
           }
         }
       }
@@ -190,6 +199,7 @@ export default {
   },
 
   methods: {
+    // Métodos disponibles en el contexto del template
     eliminarTarea() {
       router.delete(route('tarea.delete', this.tareaEliminar), {
         onSuccess: () => {
@@ -217,17 +227,23 @@ export default {
         return `${format(start, 'dd MMMM yyyy HH:mm', { locale: es })} - ${format(end, 'dd MMMM yyyy HH:mm', { locale: es })}`;
       }
     },
-     cambiarEstado  (id, estado) {
-    router.post(route('tarea.estado', id), {
+
+    // Método para cambiar el estado de una tarea
+    cambiarEstado(id, estado) {
+      router.post(route('tarea.estado', id), {
         estado: estado,
-      onSuccess: () => {
-        showDetails.value = false;
-      },
-    });
-  }
+        onSuccess: () => {
+          showDetails.value = false; // Ocultar detalles después de cambiar el estado con éxito
+        },
+      });
+    }
   }
 }
 </script>
+
+
+
+
 <template>
   <AuthenticatedLayout>
     <div class="">
@@ -333,19 +349,31 @@ export default {
           
           <!-- Buttons -->
           <div class="flex md:flex-col justify-between md:justify-start gap-3 md:pt-12 ">
-            <button @click="editarTarea(tareaDetalles.id)" v-if="tareaDetalles.tipo === 'personal' || (tareaDetalles.tipo === 'equipo'  && rol === 'manager')" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-30">
-              <font-awesome-icon :icon="['fas', 'pen-to-square']" class="mr-2" /> Editar
+            <button @click="editarTarea(tareaDetalles)" v-if="tareaDetalles.tipo === 'personal' || (tareaDetalles.tipo === 'equipo' && rol === 'manager')" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-35">
+                <font-awesome-icon :icon="['fas', 'pen-to-square']" class="sm:mr-2" /> 
+                <span class="hidden md:inline">
+                    Editar
+                </span>
             </button>
-            <button @click="asignarTarea" v-if="tareaDetalles.tipo === 'equipo' && tareaDetalles.asignada !== 1 && rol === 'manager'" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-30">
-              <font-awesome-icon :icon="['fas', 'user-tag']" class="mr-2" /> Asignar
+            <button @click="asignarTarea" v-if="tareaDetalles.tipo === 'equipo' && tareaDetalles.asignada !== 1 && rol === 'manager'" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-35">
+                <font-awesome-icon :icon="['fas', 'user-tag']" class="sm:mr-2" />
+                <span class="hidden md:inline">
+                    Asignar
+                </span>
             </button>
-            <button @click="autoasignarTarea" v-if="tareaDetalles.tipo === 'equipo' && tareaDetalles.asignada !== 1 && rol != 'manager'" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-30">
-              Pa mi
+            <button @click="autoasignarTarea" v-if="tareaDetalles.tipo === 'equipo' && tareaDetalles.asignada !== 1 && rol != 'manager'" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-35">
+                <font-awesome-icon :icon="['fas', 'user-tag']" class="sm:mr-2" />
+                <span class="hidden md:inline">
+                    Autoasignar
+                </span>
             </button>
-            <button @click="confirmEliminarTarea(tareaDetalles.id)" v-if="tareaDetalles.tipo === 'personal' || (tareaDetalles.tipo === 'equipo' && rol === 'manager')" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-30">
-              <font-awesome-icon :icon="['fas', 'trash-can']" class="mr-2" /> Eliminar
+            <button @click="confirmEliminarTarea(tareaDetalles.id)" v-if="tareaDetalles.tipo === 'personal' || (tareaDetalles.tipo === 'equipo' && rol === 'manager')" class="bg-gray-600 text-white py-2 px-4 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 w-35">
+                <font-awesome-icon :icon="['fas', 'trash-can']" class="sm:mr-2" />
+                <span class="hidden md:inline">
+                    Eliminar
+                </span>
             </button>
-          </div>
+        </div>
         </div>
       </div>
     </div>
