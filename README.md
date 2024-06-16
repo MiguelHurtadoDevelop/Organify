@@ -27,7 +27,7 @@ Alcance del proyecto:
 ## Tecnologías usadas
 
 <div align="center">
-<img src="https://skillicons.dev/icons?i=css,html,laravel,tailwind,vue" />
+<img src="https://skillicons.dev/icons?i=css,html,laravel,mysql,tailwind,vue" />
 </div>
 
 ## Capturas
@@ -55,3 +55,4 @@ Alcance del proyecto:
 <div align="center">
 <img src="https://firebasestorage.googleapis.com/v0/b/readmeasy.appspot.com/o/images%2FTareaMovil.png?alt=media&token=80f4e11b-5fb9-4d7a-84c4-499b6702020f" style="width: 40%;" />
 </div>
+
